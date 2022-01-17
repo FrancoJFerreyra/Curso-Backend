@@ -1,0 +1,22 @@
+[
+    {
+        "title":"jamon",
+        "price": 200,
+        "mark": "214"
+    }, 
+    {
+        "title":"queso",
+        "price": 150,
+        "mark": "214"
+    },
+    {
+        "title":"mayonesa",
+        "price": 60,
+        "mark": "bc"
+    }, 
+    {
+        "title":"pan",
+        "price": 100,
+        "mark": "CoderPan"
+    }
+]
