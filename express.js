@@ -51,13 +51,10 @@ products.get('/',(req,res) => {
 products.get('/:id',(req,res) => {
     let productID = parseInt(req.params.id);
     if(productsList.find(e => e.id == productID)){
-        res.send(productsList[productID - 1])    
-    }
-    else if (productID == 0 ){
-        res.send(productsList[0])
+        return res.send(productsList.find(e => e.id == productID));   
     }
     else{
-        res.send('El producto no existe')
+        return res.status(404).send("El producto no existe.")
     }
 
 });
@@ -71,32 +68,38 @@ function middlewarePrefix(req, res, next) {
     next()
 };
 //Agregar producto con id corrrespondiente.
+
 products.post('/', middlewarePrefix,(req,res) => {
     const name = req.body.name
     for (const product of productsList) {
-        if(product.title != name){
+        if(product.name != name){
             productsList.push({name,
             "id": productsList.length + 1});
-            res.send(productsList)
+            return res.send(productsList)
         } 
         else{
-            res.send("No se agrego el producto")
+            return res.send("No se agrego el producto")
         }
     }
 });
 
 app.put('/put/:id', (req,res) => {
-    res.send(`El producto con id: ${req.params.id} se actualizo. ${productsList[req.params.id - 1]}`)
+
+    res.send(`El producto con id: ${req.params.id} se actualizo. ${productsList[req.params.id - 1].name} $${productsList[req.params.id - 1].price}`);
+
 })
 
 app.delete('/delete/:id', (req,res) => {
+
     console.log(`El producto con id = ${req.params.id} fue eliminado.`);
-    if(productsList.length <= 1){
-        productsList = []
+    if(productsList.length < 1){
+        return res.send(productsList = []);
     }
     else{
-    productsList.splice(req.params.id - 1 ,1)
-    res.send(productsList) 
+        let find = productsList.find(e => e.id == req.params.id);
+        let position = productsList.indexOf(find);
+        productsList.splice(position, 1)
+            return res.send(productsList);
     }
     
 })
@@ -105,3 +108,4 @@ app.use('/products',products);
 app.use(('/static'), express.static('public'));
 
 app.listen(8080);
+console.log("Se inicio el server");
