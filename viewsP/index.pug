@@ -1,0 +1,22 @@
+html 
+    head 
+        title 
+        style 
+            include ./assets/css/bootstrap.min.css
+        
+    body 
+        h1 Ingrese nuevo producto 
+        form(action="/products" method="post")
+            div(class="form-group container")
+                label(for="productName") Nombre del producto
+                input(type="text" class="form-control container" name="productName" id="productName" placeholder="ej:Queso")
+            div(class="form-group container")
+                label(for="productPrice") Precio del producto
+                input(type="number" class="form-control container" name="productPrice" id="productPrice" placeholder="ej:$1234")
+            div(class="form-group container")
+                label(for="productImg") Foto del producto
+                input(type="url" class="form-control container" name="productImg" id="productImg" placeholder="Url de la imagen")
+            button(class="btn btn-succes mt-3 mb-5 btn-secondary") Enviar
+        block historial
+        script 
+            include ./assets/js/bootstrap.min.js

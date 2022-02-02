@@ -1,0 +1,28 @@
+
+    <h2 class="text-danger">Historial</h2>
+    <% if (products.length > 0){ %>
+        <div class="table-responsive">
+            <table class="table table-dark">
+                <thead>
+                    <tr>
+                        <th class="col">#</th>
+                        <th class="col">Nombre del producto</th>
+                        <th class="col">Precio </th>
+                        <th class="col">imagen </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (const product of products) { %>
+                        <tr>
+                            <th scope="row" ><%= products.indexOf(product) + 1 %></th>
+                            <td><%= product.productName %> </td>
+                            <td><%= product.productPrice %> </td>
+                            <td><img src=<%= product.productImg %>> </td>
+                        </tr>
+                    <% } %>  
+                </tbody>
+            </table>
+        </div>
+    <% } else { %>
+        <h3 class="text-danger bg-red">No se encontraron productos</h3>
+        <% } %> 
