@@ -9,12 +9,19 @@
     "express-handlebars": "^6.0.2",
     "handlebars": "^4.7.7",
     "nodemon": "^2.0.15",
-    "pug": "^3.0.2"
+    "pug": "^3.0.2",
+    "socket.io": "^4.4.1",
+    "uuid": "^8.3.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@babel/cli": "^7.17.0",
+    "@babel/core": "^7.17.0",
+    "@babel/node": "^7.16.8",
+    "@babel/preset-env": "^7.16.11"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon express.js"
+    "start": "nodemon express.js --exec babel-node"
   },
   "keywords": [],
   "author": "",

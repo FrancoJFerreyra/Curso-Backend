@@ -1,101 +1,65 @@
-const express = require('express');
+import express from "express";
+import { Server as webSocketServer } from "socket.io";
+import http from "http";
+import { v4 as uuid } from 'uuid';
+
+const app = express();
+const server = http.createServer(app);
+const io = new webSocketServer(server);
+
 const req = require('express/lib/request');
 const res = require('express/lib/response');
 
+const products = []
 
-const path = require('path');
+import path from "path";
+import { partials } from "handlebars";
 const {Router} = express;
 const PORT = 8080;
-const app = express();
 const router = Router();
+
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+app.use(express.static(__dirname + '/public'))
 
-const products = []
+// fetch('./public/layout/main.hbs')
 
 //HBS
 const expHbs = require('express-handlebars');
+
 app.engine(
-    'hbs',
+    '.hbs',
     expHbs.engine({
-    extName: '.hbs',  
-    layoutsDir: __dirname + '/views/layout',
-    partialsDir: __dirname + '/views/partials/',
+    extname: '.hbs',  
+    layoutsDir: __dirname + '/public/layout',
+    partialsDir: path.join(__dirname + 'partials'),
     defaultLayout: 'main.hbs' 
 }));
 app.set('view engine', '.hbs');
-app.set('views', 'views')
+app.set('views', path.join(__dirname, 'public'))
 
 
 router.get('/',(req,res) => {
+    io.on('connection', (socket) =>{
+        console.log('Nueva conexion', socket.id);
+    })
     res.render('index', {
-        products
+        products: products
     });
 });
 
-router.post('/', (req,res) =>{
-    products.push(req.body);
-    console.log(products);
-    res.redirect('/products')
+io.on('connection', (socket) =>{;
+    socket.on('client:newProduct', (data) =>{
+        const newData = {...data, id: uuid()}
+        products.push(newData)
+        console.log(newData);
+        socket.emit('server:newProduct', newData)
+    })   
 })
-/
-
-//PUG
-// app.set('views', 'viewsP');
-// app.set('view engine', 'pug');
-
-// router.get('/',(req,res) => {
-//     res.render('historial', {
-//         products
-//     });
-// });
-// router.post('/', (req,res) =>{
-//     products.push(req.body);
-//     console.log(products);
-//     res.redirect('/products')
-// })
-
-//EJS
-// app.set('views', 'viewsEjs');
-// app.set('view engine', 'ejs');
-
-// router.get('/',(req,res) => {
-//     res.render('index', {
-//         products
-//     });
-// });
-// router.post('/', (req,res) =>{
-//     products.push(req.body);
-//     console.log(products);
-//     res.redirect('/products')
-// })
 
 app.use('/products',router);
 
-app.listen(PORT, () =>{
+server.listen(PORT, () =>{
     console.log(`Se inicio el server en el puerto: ${PORT}`);
 });
 
-
-// function middlewarePrefix(req, res, next) {
-    
-//     const name = req.body.name
-//     if(name === '') res.end('Name required')
-    
-//     next()
-// };
-// //Agregar producto con id corrrespondiente.
-
-// products.post('/', middlewarePrefix,(req,res) => {
-//     const name = req.body.name
-//     for (const product of productsList) {
-//         if(product.name != name){
-//             productsList.push({name,
-//             "id": productsList.length + 1});
-//             return res.send(productsList)
-//         } 
-//         else{
-//             return res.send("No se agrego el producto")
-//         }
-//     }
-// });
