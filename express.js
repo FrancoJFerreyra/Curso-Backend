@@ -56,7 +56,7 @@ io.on('connection', (socket) =>{;
         console.log(data);
         const newData = {...data, id: uuid()};
         products.push(newData);
-        socket.emit('server:newProduct', newData)
+        socket.emit('server:newProduct', products)
         console.log(products);
 
     })

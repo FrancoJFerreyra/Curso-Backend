@@ -4,6 +4,7 @@ const productForm = document.querySelector('#productsForm');
 const productName = document.querySelector('#productName');
 const productPrice = document.querySelector('#productPrice');
 const productImg = document.querySelector('#productImg');
+const table = document.querySelector('#table')
 const tbody = document.querySelector('#tbody');
 
 productForm.addEventListener('submit', e =>{
@@ -14,16 +15,35 @@ productForm.addEventListener('submit', e =>{
        productImg : productImg.value
     })
     socket.on('server:newProduct', (data) =>{
-        // if (data.length > 0) {
-            
-        // }
+        if (data.length > 0) {
+            table.innerHTML+=`<div class="table-responsive">
+            <table class="table table-dark">
+                <thead>
+                    <tr>
+                        <th class="col">#</th>
+                        <th class="col">Nombre del producto</th>
+                        <th class="col">Precio </th>
+                        <th class="col">imagen </th>
+                    </tr>
+                </thead>
+                <tbody id="tbody">
+                </tbody>
+            </table>
+        </div>`;
+        }
+        else{
+            table.innerHTML+='<h3 class="text-danger bg-red">No se encontraron productos</h3>'
+        }
         if(tbody != null){
-            return tbody.innerHTML+= `   
+            for (const product of data) {
+                return tbody.innerHTML+= `   
                 <tr>
-                    <td> ${data.productName} </td>
-                    <td> ${data.productPrice}</td>
-                    <td><img src="${data.productImg}" > </td>
+                    <td> ${product.productName} </td>
+                    <td> ${product.productPrice}</td>
+                    <td><img src="${product.productImg}" > </td>
                 </tr>`;   
+            }
+            
         }
         else{
             console.log('error');
