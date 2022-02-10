@@ -40,21 +40,28 @@ app.set('views', path.join(__dirname, 'public'))
 
 
 router.get('/',(req,res) => {
+
     io.on('connection', (socket) =>{
-        console.log('Nueva conexion', socket.id);
+        console.log('Nueva conexion', socket.id, products);
     })
     res.render('index', {
         products: products
     });
+
 });
 
 io.on('connection', (socket) =>{;
     socket.on('client:newProduct', (data) =>{
-        const newData = {...data, id: uuid()}
-        products.push(newData)
-        console.log(newData);
+
+        console.log(data);
+        const newData = {...data, id: uuid()};
+        products.push(newData);
         socket.emit('server:newProduct', newData)
-    })   
+        console.log(products);
+
+    })
+        
+        
 })
 
 app.use('/products',router);
