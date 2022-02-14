@@ -1,6 +1,5 @@
     <h1>Ingrese el nuevo producto</h1>
     <form method="post" action="http://localhost:8080/products" id="productsForm">
-
         <div class="form-group container">
             <label for="productName"><b>Nombre del producto</b></label>
             <input type="text" class="form-control container" name="productName" id="productName" placeholder="ej:Queso">
@@ -18,5 +17,32 @@
         </div>
     </form>
     <h2 class="text-danger">Historial</h2>
-        <div id="table">
+        <div class="table-responsive">
+            <table class="table table-dark">
+                <thead>
+                    <tr>
+                        <th class="col">Id</th>
+                        <th class="col">Nombre del producto</th>
+                        <th class="col">Precio </th>
+                        <th class="col">imagen </th>
+                    </tr>
+                </thead>
+                <tbody id="tbody">
+                </tbody>
+            </table>
         </div>
+    <div>
+        <form id="chatForm">
+            <div class="form-group container">
+                <label for="email"><b>Ingrese su email</b></label>
+                <input type="email" class="form-control container" name="email" id="email" placeholder="abcd@abc.com">
+                <input type="text" id="inputChat">
+                <div class="text-center">
+                    <input type="submit" class="btn btn-succes mt-3 mb-5 btn-secondary"></button>
+                </div>
+            </div>
+        </form>
+        <div id="chatMsj">
+        </div>
+    </div>
+        

@@ -11,6 +11,7 @@ const req = require('express/lib/request');
 const res = require('express/lib/response');
 
 const products = []
+const emails = []
 
 import path from "path";
 import { partials } from "handlebars";
@@ -50,17 +51,23 @@ router.get('/',(req,res) => {
 
 });
 
-io.on('connection', (socket) =>{;
+io.on('connection', (socket) =>{
+
     socket.on('client:newProduct', (data) =>{
 
-        console.log(data);
         const newData = {...data, id: uuid()};
         products.push(newData);
-        socket.emit('server:newProduct', products)
+        socket.emit('server:newProduct', newData);
         console.log(products);
+        
 
     })
-        
+    socket.on('client:chat', (data) =>{
+        console.log(`llego data`);
+        emails.push(data);
+        socket.emit('server:chat',data);
+    })
+
         
 })
 
