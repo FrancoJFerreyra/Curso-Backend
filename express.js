@@ -10,70 +10,46 @@ const io = new webSocketServer(server);
 const req = require('express/lib/request');
 const res = require('express/lib/response');
 
+//BASE DE DATOS
 const products = []
-const emails = []
+
+//DESCOMENTAR EN CASO DE ADMIN=FALSE
+
+// const products = {
+//     productPrice: 200,
+//     productName:'hola'
+// }
 
 import path from "path";
 import { partials } from "handlebars";
 const {Router} = express;
 const PORT = 8080;
-const router = Router();
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(express.static(__dirname + '/public'))
 
-// fetch('./public/layout/main.hbs')
-
-//HBS
-const expHbs = require('express-handlebars');
-
-app.engine(
-    '.hbs',
-    expHbs.engine({
-    extname: '.hbs',  
-    layoutsDir: __dirname + '/public/layout',
-    partialsDir: path.join(__dirname + 'partials'),
-    defaultLayout: 'main.hbs' 
-}));
-app.set('view engine', '.hbs');
-app.set('views', path.join(__dirname, 'public'))
-
-
-router.get('/',(req,res) => {
-
-    io.on('connection', (socket) =>{
-        console.log('Nueva conexion', socket.id, products);
-    })
-    res.render('index', {
-        products: products
-    });
-
-});
-
 io.on('connection', (socket) =>{
-
+    //VERIFICA CONEXION
+    console.log('Nueva conexion', socket.id, products);
+    //RECIBE OBJETO DEL FORM
     socket.on('client:newProduct', (data) =>{
 
         const newData = {...data, id: uuid()};
         products.push(newData);
+        //DEVUELVE OBJ CON ID
         socket.emit('server:newProduct', newData);
+        //ENVIA OBJ Y ARRAY PARA DELETE 
+        socket.emit('server:obj+array',newData,products)
         console.log(products);
         
 
     })
-    socket.on('client:chat', (data) =>{
-        console.log(`llego data`);
-        emails.push(data);
-        socket.emit('server:chat',data);
-    })
+    //ENVIA DATA PARA ADMIN=FALSE
+    socket.emit('server:notAdmin', products)
 
-        
 })
-
-app.use('/products',router);
 
 server.listen(PORT, () =>{
     console.log(`Se inicio el server en el puerto: ${PORT}`);
 });
-
