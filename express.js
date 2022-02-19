@@ -11,7 +11,7 @@ const req = require('express/lib/request');
 const res = require('express/lib/response');
 
 //BASE DE DATOS
-const products = []
+let products = []
 
 //DESCOMENTAR EN CASO DE ADMIN=FALSE
 
@@ -31,19 +31,45 @@ app.use(express.static(__dirname + '/public'))
 
 io.on('connection', (socket) =>{
     //VERIFICA CONEXION
-    console.log('Nueva conexion', socket.id, products);
+    console.log('Nueva conexion', socket.id, products); 
+    //ENVIA ARRAY
+        socket.emit('server:products',products);
     //RECIBE OBJETO DEL FORM
     socket.on('client:newProduct', (data) =>{
-
+       
+        //DEVUELVE OBJ CON ID
         const newData = {...data, id: uuid()};
         products.push(newData);
-        //DEVUELVE OBJ CON ID
-        socket.emit('server:newProduct', newData);
-        //ENVIA OBJ Y ARRAY PARA DELETE 
-        socket.emit('server:obj+array',newData,products)
-        console.log(products);
-        
+        io.emit('server:newProduct', newData);
 
+    })
+    //ELIMINA EL PRODUCTO QUE SEA IGUAL A PRODID DEL ARRAY Y DEVUELEVE NUEVO ARRAY
+    socket.on('client:deleteProd', prodId =>{
+        products = products.filter((prod)=> prod.id !== prodId)
+        console.log(products);
+        //AL PONER IO.EMIT TODOS LOS CLIENTES VEN QUE SE ELIMINA EL OBJ
+        // socket.emit('server:products', products)
+        io.emit('server:products', products)
+    })
+    //RECIBE EL ID DEL BTNUPDATE CLICKEADO Y DEVUELVE ESE OBJETO
+    socket.on('client:updateId', prodId =>{
+        const product = products.find(prod => prod.id === prodId);
+        socket.emit('server:selectedProd', product)
+    })
+    //RECIBE EL OBJETO ACTUALIZADO
+    socket.on('client:updateProd', updatedProd =>{
+        //CREA UN ARRAY NUEVO PERO CON LA NOTA ACTUALIZADA
+        products = products.map(prod =>{
+            //VERIFICA SI EXISTE UNA NOTA ACTUALIZADA DENTRO DEL ARRAY
+            if (prod.id === updatedProd.id ) {
+                prod.productName = updatedProd.title;
+                prod.productPrice = updatedProd.price;
+                prod.productImg = updatedProd.img;
+            }
+            return prod
+        })
+        console.log(products);
+        io.emit('server:products',products);
     })
     //ENVIA DATA PARA ADMIN=FALSE
     socket.emit('server:notAdmin', products)

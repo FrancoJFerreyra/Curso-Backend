@@ -5,11 +5,68 @@ const productForm = document.querySelector('#productsForm');
 const productName = document.querySelector('#productName');
 const productPrice = document.querySelector('#productPrice');
 const productImg = document.querySelector('#productImg');
-const card = document.querySelector('#cards-container');
+const cardContainer = document.querySelector('#cards-container');
 const chatForm = document.querySelector('#chatForm');
 const divMsj = document.querySelector('#chatMsj');
 
 const admin = true;
+
+//OBTIENE UN ID AL CLICKEAR UPDATE Y A TRAVES DE ESTE UTILIZO IF
+let savedID = ''
+
+//CREA LA CARD Y CAPTURA LOS EVENTOS
+const cardUI = obj =>{
+    const div = document.createElement('div')
+    div.innerHTML+=`
+        <div class="card" style="width: 18rem;">
+            <img src="${obj.productImg}" class="card-img-top" alt="${obj.productName}">
+            <div class="card-body">
+                <h5 class="card-title">${obj.productName}</h5>
+                <p class="card-text">$${obj.productPrice}</p>
+                <p class="card-text">${obj.id}</p>
+                <a class="btn btn-dark update" type="button" data-id="${obj.id}">Editar</a>
+                <a class="btn btn-danger delete" type="button" data-id="${obj.id}">Eliminar</a>
+            </div>
+        </div>`;
+    const btnUpdate = div.querySelector('.update');
+    const btnDelete = div.querySelector('.delete');
+
+    btnDelete.addEventListener('click', ()=>{
+        deleteProd(btnDelete.dataset.id);
+    })
+    btnUpdate.addEventListener('click', ()=>{
+        getUpdateID(btnUpdate.dataset.id);
+    })
+    return div
+}
+//RENDERIZA ARRAY DE CARDS
+const renderCards = (products) => {
+    cardContainer.innerHTML='';
+    products.forEach(note => {
+        cardContainer.append(cardUI(note))
+    })
+}
+//RENDERIZA EL OBJETO
+const appendCard = (product) => {
+    cardContainer.append(cardUI(product))
+}
+// CAPTURA EL ID DEL BTNDELETE
+const deleteProd = (id) =>{
+    socket.emit('client:deleteProd', id)
+}
+//CAPTURA EL ID DEL BTNUPDATE
+const getUpdateID = (id) =>{
+    socket.emit('client:updateId',id)
+}
+//CON LOS VALUES NUEVOS ENVIA COMO OBJ AL SERVER
+const updateProd = (id,title,price,img) =>{
+    socket.emit('client:updateProd', {
+        id,
+        title,
+        price,
+        img
+    })
+}
 
 //VERIFICA SI ADMIN=TRUE O FALSE
 if (admin == true) {
@@ -17,64 +74,34 @@ if (admin == true) {
     productForm.addEventListener('submit', e =>{
         console.log(e);
         e.preventDefault();
+        //SI SAVEDID TIENE CONTENIDO DENTRO CREAR OBJETO CON LAS VALUES ACTUALIZADAS
+        if (savedID){
+            updateProd(savedID,productName.value, productPrice.value, productImg.value )
+        }
+        else{
+        //SI SAVEDID = '' ENVIAR UN OBJETO CON LA INFO DE LOS INPUT
         socket.emit('client:newProduct',{
             productName : productName.value,
             productPrice : productPrice.value,
             productImg : productImg.value
         })
-
+        }
+        productName.value = '';
+        productPrice.value = '';
+        productImg.value = '';
+        productName.focus()
     })
     //CREA CARD PARA ADMIN
-    socket.on('server:newProduct', (data) =>{
-
-        console.log(data);
-        card.innerHTML+=`
-        <div class="card" style="width: 18rem;">
-            <img src="${data.productImg}" class="card-img-top" alt="${data.productName}">
-            <div class="card-body">
-                <h5 class="card-title">${data.productName}</h5>
-                <p class="card-text">$${data.productPrice}</p>
-                <p class="card-text">${data.id}</p>
-                <a class="btn btn-dark" type="button">Editar</a>
-                <a class="btn btn-secondary" type="button" id="${data.id}">Eliminar</a>
-            </div>
-        </div>`
-
-    })
+    socket.on('server:newProduct', appendCard)
     //RECIBE LA DATA PARA ELIMINAR OBJ
-    socket.on('server:obj+array', (obj,array)=>{
-
-        let find = array.find(e => e.id === obj.id);
-        let position = array.indexOf(find);
-        const btnDelete = document.getElementById(`${find.id}`);                   
-        btnDelete.addEventListener('click', (e) =>{
-
-            console.log(e);
-            if(array.lenght >= 1){
-
-                array.splice(position,1);
-                card.innerHTML='';
-                for (const object of array) {
-
-                    card.innerHTML +=   `
-                    <div class="card" style="width: 18rem;">
-                        <img src="${object.productImg}" class="card-img-top" alt="${object.productName}">
-                            <div class="card-body">
-                                <h5 class="card-title">${object.productName}</h5>
-                                <p class="card-text">$${object.productPrice}</p>
-                                <p class="card-text">${object.id}</p>
-                                <a class="btn btn-dark" type="button">Editar</a>
-                                <a class="btn btn-secondary" type="button">Eliminar</a>
-                            </div>
-                    </div>`;
-                    }
-
-            }
-            else{
-                array = []
-            }
-            
-        })
+    socket.on('server:products', renderCards)
+    //RECIBE OBJETO PARA ACTUALIZAR SU VALOR EN EL INPUT
+    socket.on('server:selectedProd', data =>{
+        productName.value = data.productName;
+        productPrice.value = data.productPrice;
+        productImg.value = data.productImg;
+        savedID = data.id
+        console.log(savedID);
     })
 }
 //SI NO ES ADMIN
