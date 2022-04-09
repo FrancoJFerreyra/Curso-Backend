@@ -1,81 +1,108 @@
 import express from "express";
 import { Server as webSocketServer } from "socket.io";
 import http from "http";
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
+import faker from "@faker-js/faker";
+require("dotenv").config();
+const messages = require("./src/daos/messagesMongo");
+import { normalize, schema } from "normalizr";
+
+const util = require('util')
 
 const app = express();
 const server = http.createServer(app);
 const io = new webSocketServer(server);
 
-const req = require('express/lib/request');
-const res = require('express/lib/response');
-
-//BASE DE DATOS
-let products = []
-
-//DESCOMENTAR EN CASO DE ADMIN=FALSE
-
-// const products = {
-//     productPrice: 200,
-//     productName:'hola'
-// }
+const req = require("express/lib/request");
+const res = require("express/lib/response");
 
 import path from "path";
 import { partials } from "handlebars";
-const {Router} = express;
-const PORT = 8080;
+import { features } from "process";
+const { Router } = express;
+const PORT = 3000;
+const prodRouter = Router();
+const testRouter = Router();
 
 app.use(express.json());
-app.use(express.urlencoded({extended: true}));
-app.use(express.static(__dirname + '/public'))
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname + "/public"));
 
-io.on('connection', (socket) =>{
-    //VERIFICA CONEXION
-    console.log('Nueva conexion', socket.id, products); 
-    //ENVIA ARRAY
-        socket.emit('server:products',products);
-    //RECIBE OBJETO DEL FORM
-    socket.on('client:newProduct', (data) =>{
-       
-        //DEVUELVE OBJ CON ID
-        const newData = {...data, id: uuid()};
-        products.push(newData);
-        io.emit('server:newProduct', newData);
+// fetch('./public/layout/main.hbs')
 
-    })
-    //ELIMINA EL PRODUCTO QUE SEA IGUAL A PRODID DEL ARRAY Y DEVUELEVE NUEVO ARRAY
-    socket.on('client:deleteProd', prodId =>{
-        products = products.filter((prod)=> prod.id !== prodId)
-        console.log(products);
-        //AL PONER IO.EMIT TODOS LOS CLIENTES VEN QUE SE ELIMINA EL OBJ
-        // socket.emit('server:products', products)
-        io.emit('server:products', products)
-    })
-    //RECIBE EL ID DEL BTNUPDATE CLICKEADO Y DEVUELVE ESE OBJETO
-    socket.on('client:updateId', prodId =>{
-        const product = products.find(prod => prod.id === prodId);
-        socket.emit('server:selectedProd', product)
-    })
-    //RECIBE EL OBJETO ACTUALIZADO
-    socket.on('client:updateProd', updatedProd =>{
-        //CREA UN ARRAY NUEVO PERO CON LA NOTA ACTUALIZADA
-        products = products.map(prod =>{
-            //VERIFICA SI EXISTE UNA NOTA ACTUALIZADA DENTRO DEL ARRAY
-            if (prod.id === updatedProd.id ) {
-                prod.productName = updatedProd.title;
-                prod.productPrice = updatedProd.price;
-                prod.productImg = updatedProd.img;
-            }
-            return prod
-        })
-        console.log(products);
-        io.emit('server:products',products);
-    })
-    //ENVIA DATA PARA ADMIN=FALSE
-    socket.emit('server:notAdmin', products)
+//HBS
+const expHbs = require("express-handlebars");
 
-})
+app.engine(
+  ".hbs",
+  expHbs.engine({
+    extname: ".hbs",
+    layoutsDir: __dirname + "/public/layout",
+    partialsDir: path.join(__dirname + "partials"),
+    defaultLayout: "main.hbs",
+  })
+);
+app.set("view engine", ".hbs");
+app.set("views", path.join(__dirname, "public"));
+const email = [];
 
-server.listen(PORT, () =>{
-    console.log(`Se inicio el server en el puerto: ${PORT}`);
+// messages.createChat() Crea el documento que almacena los mensajes
+prodRouter.get("/", async (req, res) => {
+  io.on("connection", (socket) => {
+    console.log("Nueva conexion", socket.id, email);
+  });
+  res.render("index", {
+    email,
+  });
+});
+
+const userSchema = new schema.Entity("user", {}, { idAttribute: "email" });
+const messageSchema = new schema.Entity(
+  "content",
+  { user: userSchema },
+  { idAttribute: "messageId" }
+);
+const chatSchema = new schema.Entity(
+  "chat",
+  { user: userSchema, messages: [messageSchema] },
+  { idAttribute: "chatId" }
+);
+let normalizedData = normalize(messages.getMessages(), chatSchema);
+console.log("normalizado", normalizedData);
+
+console.log(util.inspect(normalizedData, true, 3 ,true))
+
+io.on("connection", (socket) => {
+  socket.emit('Mensajes almacenados', normalizedData);  
+  socket.on("client:chat", (data) => {
+    console.log(`llego data`);
+    messages.saveMessage(data);
+    email.push(data);
+    socket.emit("server:chat", data);
+  });
+});
+
+//Faker
+const fakeData = (quantity) => {
+  const productsFake = [];
+  for (let i = 0; i < quantity; i++) {
+    productsFake.push({
+      name: faker.commerce.productName(),
+      price: faker.commerce.price(),
+      img: faker.image.avatar(100, 100),
+    });
+  }
+  return productsFake;
+};
+testRouter.get("/", (req, res) => {
+  const productsFake = fakeData(5);
+  res.render("fake", { productsFake });
+  console.log("Productos test:", productsFake);
+});
+
+app.use("/products", prodRouter);
+app.use("/api/products-test", testRouter);
+
+server.listen(PORT, () => {
+  console.log(`Se inicio el server en el puerto: ${PORT}`);
 });
