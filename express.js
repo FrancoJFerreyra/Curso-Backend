@@ -2,12 +2,16 @@ import express from "express";
 import { Server as webSocketServer } from "socket.io";
 import http from "http";
 import { v4 as uuid } from "uuid";
-import faker from "@faker-js/faker";
+import testRouter from "./src/routers/faker.routes";
+import session from "express-session";
+import cookieParser from "cookie-parser";
+import mongoStore from "connect-mongo";
 require("dotenv").config();
 const messages = require("./src/daos/messagesMongo");
 import { normalize, schema } from "normalizr";
+import userRoutes from "./src/routers/user.routes";
 
-const util = require('util')
+const util = require("util");
 
 const app = express();
 const server = http.createServer(app);
@@ -19,16 +23,33 @@ const res = require("express/lib/response");
 import path from "path";
 import { partials } from "handlebars";
 import { features } from "process";
+
 const { Router } = express;
 const PORT = 3000;
 const prodRouter = Router();
-const testRouter = Router();
+
+//COOKIES
+const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true };
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname + "/public"));
-
-// fetch('./public/layout/main.hbs')
+app.use(cookieParser());
+app.use(
+  session({
+    store: mongoStore.create({
+      mongoUrl:
+        "mongodb+srv://FrancoDev:FrancoDev@cluster0.dl6ll.mongodb.net/Clase24",
+      mongoOptions: advancedOptions,
+    }),
+    secret: "shhhh",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 60000
+    },
+  })
+);
 
 //HBS
 const expHbs = require("express-handlebars");
@@ -47,33 +68,48 @@ app.set("views", path.join(__dirname, "public"));
 const email = [];
 
 // messages.createChat() Crea el documento que almacena los mensajes
-prodRouter.get("/", async (req, res) => {
+//SOCKET.IO
+prodRouter.get("/", (req, res) => {
   io.on("connection", (socket) => {
     console.log("Nueva conexion", socket.id, email);
+    //AQUI TENGO EL PROBLEMA
+      socket.on("client:logout", () => {
+        socket.emit('server:redirect',
+          res.redirect("/user/logout")
+        )
+        });
   });
-  res.render("index", {
-    email,
-  });
-});
-
-const userSchema = new schema.Entity("user", {}, { idAttribute: "email" });
-const messageSchema = new schema.Entity(
-  "content",
-  { user: userSchema },
-  { idAttribute: "messageId" }
+  if (req.session.user) {
+    console.log("Cookie", req.cookies);
+    res.render("index", {
+      user: req.session.user,
+    });
+  } else {
+      res.redirect("/user/login");
+     };
+    }
 );
-const chatSchema = new schema.Entity(
-  "chat",
-  { user: userSchema, messages: [messageSchema] },
-  { idAttribute: "chatId" }
-);
-let normalizedData = normalize(messages.getMessages(), chatSchema);
-console.log("normalizado", normalizedData);
 
-console.log(util.inspect(normalizedData, true, 3 ,true))
+
+//NORMALIZE
+// const userSchema = new schema.Entity("user", {}, { idAttribute: "email" });
+// const messageSchema = new schema.Entity(
+//   "content",
+//   { user: userSchema },
+//   { idAttribute: "messageId" }
+// );
+// const chatSchema = new schema.Entity(
+//   "chat",
+//   { user: userSchema, messages: [messageSchema] },
+//   { idAttribute: "chatId" }
+// );
+// let normalizedData = normalize(messages.getMessages(), chatSchema);
+// console.log("normalizado", normalizedData);
+
+// console.log(util.inspect(normalizedData, true, 3, true));
 
 io.on("connection", (socket) => {
-  socket.emit('Mensajes almacenados', normalizedData);  
+  // socket.emit("Mensajes almacenados", normalizedData);
   socket.on("client:chat", (data) => {
     console.log(`llego data`);
     messages.saveMessage(data);
@@ -82,26 +118,9 @@ io.on("connection", (socket) => {
   });
 });
 
-//Faker
-const fakeData = (quantity) => {
-  const productsFake = [];
-  for (let i = 0; i < quantity; i++) {
-    productsFake.push({
-      name: faker.commerce.productName(),
-      price: faker.commerce.price(),
-      img: faker.image.avatar(100, 100),
-    });
-  }
-  return productsFake;
-};
-testRouter.get("/", (req, res) => {
-  const productsFake = fakeData(5);
-  res.render("fake", { productsFake });
-  console.log("Productos test:", productsFake);
-});
-
 app.use("/products", prodRouter);
 app.use("/api/products-test", testRouter);
+app.use("/user", userRoutes);
 
 server.listen(PORT, () => {
   console.log(`Se inicio el server en el puerto: ${PORT}`);

@@ -36,7 +36,7 @@ class mongoContainer {
 
   getMessages = async () => {
     const chat = await this.model.findById({ _id: "6250c34f14d8cc41f482c523" });
-    const messages = chat.messages
+    const messages = chat.messages;
     const mapMessages = messages.map((message) => ({
       user: {
         id: message.id,
