@@ -16,6 +16,9 @@ btnLogout.addEventListener("click", (e) => {
   socket.emit("client:logout", console.log("logout req recibied"));
   console.log('click');
 });
+socket.on('server:redirect', (logoutHbs)=>{
+  window.location.href = logoutHbs;
+})
 
 chatForm.addEventListener("submit", (e) => {
   e.preventDefault();

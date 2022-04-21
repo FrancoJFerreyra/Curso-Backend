@@ -67,16 +67,15 @@ app.set("view engine", ".hbs");
 app.set("views", path.join(__dirname, "public"));
 const email = [];
 
+const logoutHbs = '/user/logout';
+
 // messages.createChat() Crea el documento que almacena los mensajes
 //SOCKET.IO
 prodRouter.get("/", (req, res) => {
   io.on("connection", (socket) => {
     console.log("Nueva conexion", socket.id, email);
-    //AQUI TENGO EL PROBLEMA
       socket.on("client:logout", () => {
-        socket.emit('server:redirect',
-          res.redirect("/user/logout")
-        )
+        socket.emit('server:redirect', logoutHbs)
         });
   });
   if (req.session.user) {
