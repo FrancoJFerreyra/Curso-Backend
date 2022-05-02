@@ -1,0 +1,27 @@
+{{#each errors}}
+<div class="alert alert-succes alert-dismissible fade show" role="alert">
+    {{text}}
+    <button type="button" class="close" data-dismiss="alert" aria-label="close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+{{/each}}
+<form action="/user/register" method="post" class="d-flex flex-column align-items-center">
+    <div class="text-center d-flex flex-column justify-content-center w-25 p-3 align-items-center">
+        <label for="user">Nombre de usuario</label>
+        <input type="text" name="user" required />
+    </div>
+    <div class="text-center d-flex flex-column justify-content-center w-25 p-3 align-items-center">
+        <label for="password">Contraseña</label>
+        <input type="password" name="password" required />
+    </div>
+    <div class="text-center">
+        <button type="submit" class="btn btn-success mt-3 mb-5 ">Registrarse
+        </button>
+        <a href="/user/login">
+            <button type="button" class="btn mt-3 mb-5 btn-secondary">Ingresar
+            </button>
+        </a>
+    </div>
+    </div>
+</form>

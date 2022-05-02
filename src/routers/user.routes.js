@@ -1,28 +1,23 @@
+import routeFunctions from "../containers/functions";
 import express from "express";
 const { Router } = express;
 
 const userRoutes = Router();
 
-userRoutes.get("/login", (req, res) => {
-  res.render("login");
-});
+userRoutes.get("/login", routeFunctions.getLogin);
 
-userRoutes.post("/login", (req, res) => {
-  const user = req.body.user;
-  const password = req.body.password;
-  req.session.user = user;
-  req.session.password = password;
-  res.redirect("/products");
-});
+userRoutes.post("/login", routeFunctions.postLogin);
 
-userRoutes.get("/logout", (req, res) => {
-  res.render("logout", {
-    userLogout: req.session.user,
-  });
-  setTimeout(() => {
-    req.session.destroy();
-    res.redirect("/user/login");
-  }, 2000);
-});
+userRoutes.get("/register", routeFunctions.getRegister);
+
+userRoutes.post("/register", routeFunctions.postRegister);
+
+userRoutes.get(
+  "/logout",
+  routeFunctions.checkAuthentication,
+  routeFunctions.getLogout
+);
+
+userRoutes.get("/loginError", routeFunctions.loginError);
 
 export default userRoutes;

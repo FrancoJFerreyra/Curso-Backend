@@ -1,9 +1,10 @@
-import mongoose from "mongoose";
-import config from "../config";
+import mongoose from 'mongoose';
+import config from '../config/DBconfig';
+
 (async () => {
   try {
     const db = await mongoose.connect(config.mongoRemote.cnxStr);
-    await console.log("DB connected");
+    await console.log('DB connected');
   } catch (err) {
     console.log(err);
   }
@@ -17,13 +18,13 @@ class mongoContainer {
     const chat = await new this.model();
     try {
       await chat.save();
-      console.log("Chat created", chat);
+      console.log('Chat created', chat);
     } catch (err) {
       console.log(err);
     }
   };
   saveMessage = async (data) => {
-    const chat = await this.model.findById({ _id: "6250c34f14d8cc41f482c523" });
+    const chat = await this.model.findById({ _id: '626b3650ab824d0895fec783' });
     console.log(chat.messages);
     chat.messages.push(data);
     try {
@@ -35,7 +36,7 @@ class mongoContainer {
   };
 
   getMessages = async () => {
-    const chat = await this.model.findById({ _id: "6250c34f14d8cc41f482c523" });
+    const chat = await this.model.findById({ _id: '626b3650ab824d0895fec783' });
     const messages = chat.messages;
     const mapMessages = messages.map((message) => ({
       user: {
@@ -54,14 +55,24 @@ class mongoContainer {
     return mapMessages
   };
 
+  saveNewUser = async (newUser) =>{
+    const user = new this.model(newUser);
+    user.password = await user.encryptPassword(user.password);
+    try {
+      await user.save();
+      console.log(`Usuario guardado : ${newUser.user}`);
+    } catch (err) {
+      console.log(err);
+    }
+  }
   // saveMessage = async (data) => {
-  //     console.log("data recibied", data);
+  //     console.log('data recibied', data);
   //     const chat = await new this.model(data);
   //     console.log(chat);
   //     chat.messages.push(data);
   //     try {
   //       await chat.save();
-  //       console.log("Message saved", chat);
+  //       console.log('Message saved', chat);
   //     } catch (err) {
   //       console.log(err);
   //     }

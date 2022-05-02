@@ -1,6 +1,6 @@
-import express from "express";
+import express from 'express';
 const {Router} = express;
-import faker from "@faker-js/faker";
+import faker from '@faker-js/faker';
 
 const testRouter = Router();
 
@@ -15,10 +15,10 @@ const fakeData = (quantity) => {
     }
     return productsFake;
   };
-  testRouter.get("/", (req, res) => {
+  testRouter.get('/', (req, res) => {
     const productsFake = fakeData(5);
-    res.render("fake", { productsFake });
-    console.log("Productos test:", productsFake);
+    res.render('fake', { productsFake });
+    console.log('Productos test:', productsFake);
   });
 
   export default testRouter

@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model } from 'mongoose';
 import message from './message'
 const chatSchema = new Schema({
   messages : [message.schema]
