@@ -34,7 +34,7 @@ import path from 'path';
 import { partials } from 'handlebars';
 import { features } from 'process';
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 //SET COOKIES
 const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true };
@@ -44,6 +44,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 app.use(cookieParser());
 app.use(
+  
   session({
     store: mongoStore.create({
       mongoUrl:
