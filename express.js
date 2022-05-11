@@ -1,5 +1,6 @@
 import express from 'express';
 import { Server as webSocketServer } from 'socket.io';
+const { Router } = express;
 import http from 'http';
 import { v4 as uuid } from 'uuid';
 
@@ -83,6 +84,11 @@ app.set('view engine', '.hbs');
 app.set('views', path.join(__dirname, 'public/views'));
 const email = [];
 
+const welcomeRouter = Router()
+
+welcomeRouter.get('/', (req,res)=>{
+  res.render('welcome')
+})
 //NORMALIZE
 // const userSchema = new schema.Entity('user', {}, { idAttribute: 'id' });
 // const messageSchema = new schema.Entity(
@@ -99,7 +105,7 @@ const email = [];
 // console.log('normalizado', normalizedData);
 
 // console.log(util.inspect(normalizedData, true, 3, true));
-
+app.use('/', welcomeRouter)
 app.use('/chat', chatRouter);
 app.use('/api/products-test', testRouter);
 app.use('/user', userRoutes);
