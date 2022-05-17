@@ -1,5 +1,6 @@
 import passport from "passport";
-import userMongo from "../daos/userMongo";
+import userMongoContainer from "../daos/userDao";
+import cartMongoContainer from "../daos/cartDao";
 import userSchema from "../../models/userSchema";
 
 const checkAuthentication = (req, res, next) => {
@@ -9,12 +10,23 @@ const checkAuthentication = (req, res, next) => {
     res.redirect("/user/login");
   }
 };
+const checkAdmin = (req, res, next) => {
+  if (req.user.role == 2) {
+    next();
+  } else {
+    const notAdmin =
+      "No tiene autorizacion para acceder a la pagina solicitada.";
+    res.render("error", {
+      notAdmin,
+    });
+  }
+};
 const getLogin = (req, res) => {
   res.render("login");
 };
 const postLogin = passport.authenticate("login", {
   failureRedirect: "/user/loginError",
-  successRedirect: "/chat",
+  successRedirect: "/content/home",
   failureFlash: true,
 });
 
@@ -24,7 +36,6 @@ const getRegister = (req, res) => {
 
 const postRegister = async (req, res) => {
   const errors = [];
-  const user = req.body.user;
   const password = req.body.password;
   if (password.length < 4) {
     errors.push({ text: "La contraseña debe contar con 4 o mas caracteres." });
@@ -34,11 +45,11 @@ const postRegister = async (req, res) => {
       errors,
     });
   } else {
-    res.redirect("/chat");
-    userMongo.saveNewUser({
-      user: user,
-      password: password,
-    });
+    const cart = await cartMongoContainer.createCart()
+    console.log(cart._id);
+    res.redirect("/content/home");
+    console.log({ ...req.body, role: 1 });
+    userMongoContainer.saveNewUser({ ...req.body, role: 1});
   }
 };
 
@@ -51,10 +62,11 @@ const getLogout = (req, res) => {
 };
 
 const loginError = (req, res) => {
-  res.render("loginError");
+  res.render("error");
 };
 export default {
   checkAuthentication,
+  checkAdmin,
   getLogin,
   postLogin,
   getRegister,

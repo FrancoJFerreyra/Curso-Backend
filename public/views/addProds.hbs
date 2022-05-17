@@ -1,0 +1,49 @@
+{{>navbar}}
+<h1>Ingrese el nuevo producto</h1>
+<form id="productsForm">
+    <div class="form-group container">
+        <label for="productName"><b>Nombre del producto</b></label>
+        <input type="text" class="form-control container" name="productName" id="productName" placeholder="ej:Queso">
+    </div>
+    <div class="form-group container">
+        <label for="description"><b>Descripción</b></label>
+        <input type="text" class="form-control container" name="description" id="description"
+            placeholder="ej:Queso roquefort 1kg">
+    </div>
+    <div class="form-group container">
+        <label for="productPrice"><b>Precio del producto</b></label>
+        <input type="number" class="form-control container" name="productPrice" id="productPrice"
+            placeholder="ej:$1234">
+    </div>
+    <div class="form-group container">
+        <label for="productImg"><b>Foto del producto</b></label>
+        <input type="url" class="form-control container" name="productImg" id="productImg"
+            placeholder="Url de la imagen">
+    </div>
+    <div class="form-group container">
+        <label for="stock"><b>Stock</b></label>
+        <input type="text" class="form-control container" name="stock" id="stock" placeholder="ej:5">
+    </div>
+    <div class="text-center">
+        <input type="submit" class="btn btn-succes mt-3 mb-5 btn-secondary"></button>
+    </div>
+</form>
+<h2 class="text-danger">Productos agregados:</h2>
+<div class="table-responsive">
+    <table class="table table-dark">
+        <thead>
+            <tr>
+                <th class="col">Nombre del producto</th>
+                <th class="col">Descripción</th>
+                <th class="col">Precio</th>
+                <th class="col">imagen</th>
+                <th class="col">Stock</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+        </tbody>
+    </table>
+</div>
+<div>
+    <script src="/socket.io/socket.io.min.js"></script>
+    <script src="../clients/addProdsClient.js"></script>

@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import userModel from "../../models/userSchema";
+import mongoContainer from "../daos/userDao";
 
 passport.use(
   "login",
@@ -11,18 +12,20 @@ passport.use(
       usernameField: "user",
       passwordField: "password",
     },
-    async (username, password, done) => {
-      console.log("Usuario recibido", username);
-      console.log("Buscado", await userModel.findOne({ user: username }));
-      const user = await userModel.findOne({ user: username });
+    async (userEmail, password, done) => {
+      console.log("Usuario recibido", userEmail);
+      console.log("Buscado", await userModel.findOne({ email: userEmail }));
+      const user = await userModel.findOne({ email: userEmail });
       if (!user) {
         console.log("Usuario no encontrado");
         return done(null, false, {
-          message: `Usuario con nombre ${username} no encontrado.`,
+          message: `Usuario con nombre ${userEmail} no encontrado.`,
         });
       } else {
+        if (user.role == 1 && userEmail == "ferreyra_franco02@outlook.com") {
+          mongoContainer.becomeAdmin(user._id);
+        }
         const match = await user.matchPassword(password);
-        console.log("match", await user.matchPassword(password));
         if (match) {
           console.log("match");
           return done(null, user);

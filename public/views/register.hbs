@@ -8,8 +8,32 @@
 {{/each}}
 <form action="/user/register" method="post" class="d-flex flex-column align-items-center">
     <div class="text-center d-flex flex-column justify-content-center w-25 p-3 align-items-center">
-        <label for="user">Nombre de usuario</label>
-        <input type="text" name="user" required />
+        <label for="avatar">Avatar</label>
+        <input type="url" name="avatar" id="avatar" placeholder="Url de la imagen">
+    </div>
+    <div class="text-center d-flex flex-column justify-content-center w-25 p-3 align-items-center">
+        <label for="email">Email</label>
+        <input type="email" name="email" placeholder="abcd@abc.com" required>
+    </div>
+    <div class="text-center d-flex flex-column justify-content-center w-25 p-3 align-items-center">
+        <label for="direction">Dirección</label>
+        <input type="text" name="direction" required>
+    </div>
+    <div class="text-center d-flex flex-column justify-content-center w-25 p-3 align-items-center">
+        <label for="user">Nombre</label>
+        <input type="text" name="user" placeholder="Juan" required />
+    </div>
+    <div class="text-center d-flex flex-column justify-content-center w-25 p-3 align-items-center">
+        <label for="lastname">Apellido</label>
+        <input type="text" name="lastname" placeholder="Perez" required>
+    </div>
+    <div class="text-center d-flex flex-column justify-content-center w-25 p-3 align-items-center">
+        <label for="age">Edad</label>
+        <input type="number" name="age" placeholder="19" required>
+    </div>
+    <div class="text-center d-flex flex-column justify-content-center w-25 p-3 align-items-center">
+        <label for="phone">Telefono</label>
+        <input type="tel" name="phone" placeholder="(Código de área) Número" required>
     </div>
     <div class="text-center d-flex flex-column justify-content-center w-25 p-3 align-items-center">
         <label for="password">Contraseña</label>

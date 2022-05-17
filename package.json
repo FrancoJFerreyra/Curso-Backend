@@ -1,9 +1,10 @@
 {
-  "name": "expressServer",
+  "name": "HerokuServer",
   "version": "1.0.0",
   "description": "",
   "main": "express.js",
   "dependencies": {
+    "@handlebars/allow-prototype-access": "^1.0.5",
     "bcrypt": "^5.0.1",
     "connect-flash": "^0.1.1",
     "connect-mongo": "^4.6.0",
@@ -14,6 +15,7 @@
     "express-session": "^1.17.2",
     "firebase": "^9.6.10",
     "handlebars": "^4.7.7",
+    "jsonwebtoken": "^8.5.1",
     "knex": "^0.95.15",
     "mongoose": "^6.2.9",
     "morgan": "^1.10.0",
@@ -34,7 +36,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon express.js --exec babel-node",
+    "start": "nodemon --exec npx babel-node express.js --ignore /public",
     "heroku-prebuild": "export NPM_CONFIG_PRODUCTION=false; export NODE_ENV=; NPM_CONFIG_PRODUCTION=false NODE_ENV=development npm install --only=dev --dev",
     "heroku-postbuild": "export NPM_CONFIG_PRODUCTION=true; export NODE_ENV=production;"
   },
