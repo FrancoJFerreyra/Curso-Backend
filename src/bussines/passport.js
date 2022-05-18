@@ -3,6 +3,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import userModel from "../../models/userSchema";
 import mongoContainer from "../daos/userDao";
+import loggerW from "../winston";
 
 passport.use(
   "login",
@@ -13,11 +14,10 @@ passport.use(
       passwordField: "password",
     },
     async (userEmail, password, done) => {
-      console.log("Usuario recibido", userEmail);
-      console.log("Buscado", await userModel.findOne({ email: userEmail }));
+      console.log("Usuario hayado en DB");
       const user = await userModel.findOne({ email: userEmail });
       if (!user) {
-        console.log("Usuario no encontrado");
+        console.log("usuario no encontrado");
         return done(null, false, {
           message: `Usuario con nombre ${userEmail} no encontrado.`,
         });
@@ -27,7 +27,7 @@ passport.use(
         }
         const match = await user.matchPassword(password);
         if (match) {
-          console.log("match");
+          console.log("El usuario fue autenticado");
           return done(null, user);
         } else {
           return done(null, false, { message: "Contraseña incorrecta." });

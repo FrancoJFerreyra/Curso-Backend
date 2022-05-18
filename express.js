@@ -16,6 +16,8 @@ import passport from "passport";
 
 import flash from "connect-flash";
 
+import loggerW from "./src/winston";
+
 const util = require("util");
 
 require("dotenv").config();
@@ -92,5 +94,6 @@ app.use("/admin", adminRouter);
 server.listen(PORT, () => {
   console.log(`Se inicio el server en el puerto: ${PORT}`);
 });
+// server.on('error', error => {loggerW.fatal(error)})
 
 export  {io};

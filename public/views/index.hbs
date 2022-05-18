@@ -9,18 +9,18 @@
     {{/if}}
     {{#each products}}
     <div>
-    <div class="card" style="width: 18rem;">
-      <img src="{{img}}" class="card-img-top" alt="...">
-      <div class="card-body">
-        <h5 class="card-title">{{title}}</h5>
-        <p class="card-text">{{description}}</p>
-        <button class="btnAddToCart btn btn-primary " data-id="{{_id}}">Agregar al carrito</button>
-        <p class="card-text">${{price}}</p>
+      <div class="card" style="width: 18rem;">
+        <img src="{{img}}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">{{title}}</h5>
+          <p class="card-text">{{description}}</p>
+          <button class="btnAddToCart btn btn-primary " data-id="{{_id}}">Agregar al carrito</button>
+          <p class="card-text">${{price}}</p>
+        </div>
       </div>
-    </div>
     </div>
     {{/each}}
   </div>
 </div>
 <script src="/socket.io/socket.io.min.js"></script>
-<script src="../clients/homeClient.js"></script> 
+<script src="../clients/homeClient.js"></script>
