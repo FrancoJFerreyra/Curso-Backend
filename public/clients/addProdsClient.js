@@ -14,7 +14,7 @@ productForm.addEventListener("submit", (e) => {
   socket.emit("client:newProduct", {
     title: productName.value,
     description: productDescription.value,
-    price: productPrice.value,
+    price: productPrice.value, 
     img: productImg.value,
     stock: productStock.value,
   });

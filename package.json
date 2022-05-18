@@ -13,19 +13,13 @@
     "express": "^4.17.2",
     "express-handlebars": "^6.0.2",
     "express-session": "^1.17.2",
-    "firebase": "^9.6.10",
     "handlebars": "^4.7.7",
-    "jsonwebtoken": "^8.5.1",
-    "knex": "^0.95.15",
     "mongoose": "^6.2.9",
-    "morgan": "^1.10.0",
-    "mysql": "^2.18.1",
     "nodemon": "^2.0.15",
-    "normalizr": "^3.6.2",
     "passport": "^0.5.2",
     "passport-local": "^1.0.0",
     "socket.io": "^4.4.1",
-    "uuid": "^8.3.2"
+    "winston": "^3.7.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.0",

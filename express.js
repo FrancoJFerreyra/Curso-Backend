@@ -1,19 +1,17 @@
 import express from "express";
-import { Server as webSocketServer } from "socket.io";
 const { Router } = express;
+import { Server as webSocketServer } from "socket.io";
 import http from "http";
-import { v4 as uuid } from "uuid";
 
 import userRouter from "./src/routers/user.routes";
 import contentRouter from "./src/routers/content.routes";
+import adminRouter from "./src/routers/admin.routes";
 
 import session from "express-session";
 import cookieParser from "cookie-parser";
 import mongoStore from "connect-mongo";
 
-import { normalize, schema } from "normalizr";
-
-import passportFile from "./src/config/passport";
+import passportFile from "./src/bussines/passport";
 import passport from "passport";
 
 import flash from "connect-flash";
@@ -61,7 +59,6 @@ app.use(passport.session());
 app.use(flash());
 app.use((req, res, next) => {
   res.locals.error = req.flash("error");
-  res.locals.user = req.user || null;
   next();
 });
 //SET HBS
@@ -87,26 +84,6 @@ welcomeRouter.get("/", (req, res) => {
   res.render("welcome");
 });
 
-import mongoContainer from "./src/daos/productsDao";
-import routerFunctions from "./src/containers/functions";
-const adminRouter = Router();
-
-adminRouter.get(
-  "/addProds",
-  routerFunctions.checkAuthentication,
-  routerFunctions.checkAdmin,
-  (req, res) => {
-    io.on("connection", (socket) => {
-      socket.on("client:newProduct", (data) => {
-        console.log("llego data al server");
-        mongoContainer.save(data);
-        socket.emit("server:newProduct", data);
-      });
-    });
-    res.render("addProds");
-  }
-);
-
 app.use("/", welcomeRouter);
 app.use("/content", contentRouter);
 app.use("/user", userRouter);
@@ -116,4 +93,4 @@ server.listen(PORT, () => {
   console.log(`Se inicio el server en el puerto: ${PORT}`);
 });
 
-export default io;
+export  {io};

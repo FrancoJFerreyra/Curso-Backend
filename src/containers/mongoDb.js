@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
-import config from "../config/DBconfig";
+import bussines from "../bussines/DBconfig";
 
 (async () => {
   try {
-    const db = await mongoose.connect(config.mongoRemote.cnxStr);
+    const db = await mongoose.connect(bussines.mongoRemote.cnxStr);
     await console.log("DB connected");
   } catch (err) {
     console.log(err);
@@ -33,8 +33,9 @@ class mongoContainer {
   };
 
   getOne = async (id) => {
-    const product = await this.model.findById({ _id: id });
-    console.log(product);
+    const product = await this.model.findById({ _id: id }); 
+    console.log('Producto requerido', product);
+    return product;
   };
 
   listarAll = async () => {
@@ -64,23 +65,13 @@ class mongoContainer {
     }
   };
 
-  createCart = async () => {
-    console.log("data recibied");
-    const userCart = new this.model();
+  addProd = async (product, idUser) => {
+    console.log('Producto', product);
+    const user = await this.model.findById({ _id: idUser });
+    user.cart.push(product);
     try {
-      await userCart.save();
-      console.log("data saved", userCart);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  addProd = async (id, data) => {
-    const cart = await this.model.findById({ _id: id });
-    cart.products.push(data);
-    try {
-      cart.save();
-      console.log(`Producto agregado: ${data.title}`);
+      user.save();
+      console.log(`Producto agregado: ${product.title}`);
     } catch (err) {
       console.log(err);
     }

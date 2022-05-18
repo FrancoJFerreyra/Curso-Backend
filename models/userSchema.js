@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
-import cart from './cartSchema';
+import products from './productsSchema'
 
 const userSchema = new Schema({
     avatar:{ type: String, required: true },
@@ -12,6 +12,7 @@ const userSchema = new Schema({
     phone: { type: Number, required: true, unique: true },
     password: { type: String, required: true},
     role: {type: Number, required: true},
+    cart: [products.productSchema]
 });
 
 userSchema.methods.encryptPassword = async password =>{

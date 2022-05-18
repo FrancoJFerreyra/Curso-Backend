@@ -1,23 +1,27 @@
-import routeFunctions from "../containers/functions";
+import {
+  getLogin,
+  postLogin,
+  getRegister,
+  postRegister,
+  getLogout,
+  loginError,
+} from "../controllers/functions";
+import { checkAuthentication } from "../controllers/middlewares";
 import express from "express";
 const { Router } = express;
 
 const userRoutes = Router();
 
-userRoutes.get("/login", routeFunctions.getLogin);
+userRoutes.get("/login", getLogin);
 
-userRoutes.post("/login", routeFunctions.postLogin);
+userRoutes.post("/login", postLogin);
 
-userRoutes.get("/register", routeFunctions.getRegister);
+userRoutes.get("/register", getRegister);
 
-userRoutes.post("/register", routeFunctions.postRegister);
+userRoutes.post("/register", postRegister);
 
-userRoutes.get(
-  "/logout",
-  routeFunctions.checkAuthentication,
-  routeFunctions.getLogout
-);
+userRoutes.get("/logout", checkAuthentication, getLogout);
 
-userRoutes.get("/loginError", routeFunctions.loginError);
+userRoutes.get("/loginError", loginError);
 
 export default userRoutes;
