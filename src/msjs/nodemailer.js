@@ -17,7 +17,7 @@ const mailOptions = {
     html: ''
 }
 
-const send = async (options) => {
+const sendEmail = async (options) => {
     try {
         const info = await transporter.sendMail(options);
         console.log(info);
@@ -27,5 +27,5 @@ const send = async (options) => {
 }
 export {
     mailOptions,
-    send
+    sendEmail
 }

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import bussines from "../bussines/DBconfig";
+import bussines from "../config/DBconfig";
 
 (async () => {
   try {
@@ -32,9 +32,9 @@ class mongoContainer {
     );
   };
 
-  getOne = async (id) => {
+  getOneDoc = async (id) => {
     const product = await this.model.findById({ _id: id }); 
-    console.log('Producto requerido', product);
+    console.log('Producto requerido', product._id);
     return product;
   };
 
@@ -54,12 +54,12 @@ class mongoContainer {
     }
   };
 
-  addProd = async (product, idUser) => {
+  addProd = async (prod, idUser) => {
     const user = await this.model.findById({ _id: idUser });
-    user.cart.push(product);
+    user.cart.push(prod);
     try {
       user.save();
-      console.log(`Producto agregado: ${product.title}`);
+      console.log(`Producto agregado: ${prod.title}`);
     } catch (err) {
       console.log(err);
     }
@@ -84,6 +84,7 @@ class mongoContainer {
   };
 
   emptyCart = async (userId)=>{
+    console.log('id user', userId);
     try {
       await this.model.updateOne(
         { _id: userId },

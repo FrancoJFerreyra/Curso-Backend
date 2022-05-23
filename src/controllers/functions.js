@@ -2,9 +2,10 @@ import passport from "passport";
 import userMongoContainer from "../daos/userDao";
 import productMongoContainer from "../daos/productsDao";
 import { io } from "../../express";
-import { send, mailOptions } from "../msjs/nodemailer";
+import { sendEmail, mailOptions } from "../msjs/nodemailer";
+import { sendWhatsapp, options } from "../msjs/whatsapp";
 
-const getLogin = (req, res) => {
+const renderLogin = (req, res) => {
   res.render("login");
 };
 const postLogin = passport.authenticate("login", {
@@ -13,7 +14,7 @@ const postLogin = passport.authenticate("login", {
   failureFlash: true,
 });
 
-const getRegister = (req, res) => {
+const renderRegister = (req, res) => {
   res.render("register");
 };
 
@@ -63,7 +64,7 @@ const postRegister = async (req, res) => {
     </tr>
     </table>
     `;
-    send(mailOptions);
+    sendEmail(mailOptions);
     res.redirect("/content/home");
     console.log({ ...req.body, role: 1 });
     userMongoContainer.saveNewUser({ ...req.body, role: 1 });
@@ -81,30 +82,22 @@ const adminAddProds = (req, res) => {
   res.render("addProds");
 };
 
-const getHomePage = async (req, res) => {
+const renderHomePage = async (req, res) => {
   const products = await productMongoContainer.listarAll();
   if (req.user.role == 2) {
     const admin = req.user.role;
     res.render("index", {
       admin,
-      products,
+      products
     });
   } else {
-    io.on("connection", (socket) => {
-      socket.on("homeClient:buyBtn", async (id) => {
-        console.log("producto comprado id", id);
-        const product = await productMongoContainer.getOne(id);
-        const idUser = req.user.id;
-        const saveProduct = userMongoContainer.addProd(product, idUser);
-      });
-    });
     res.render("index", {
-      products,
+      products
     });
   }
 };
 
-const getUserProfile = (req, res) => {
+const renderUserProfile = (req, res) => {
   const { avatar, email, direction, user, lastname, age, phone } = req.user;
   res.render("profile", {
     avatar,
@@ -117,40 +110,66 @@ const getUserProfile = (req, res) => {
   });
 };
 
-const getCart = async (req, res) => {
-  const idUser = req.user.id;
-  const cart = req.user.cart;
-  io.on("connection", (socket) => {
-    socket.on("cartClient: removeProd", (idProd) => {
-      console.log("Se recibio un id", idProd);
-      const saveProduct = userMongoContainer.deleteProd(idProd, idUser);
-    });
-    socket.on("client: buyCart", ()=>{ 
-      mailOptions.subject = "Nuevo pedido";
-      mailOptions.html = '';
-      for (const product of cart) {  
-        mailOptions.html += `
-        <p>Producto:${product.title}, precio:$${product.price}</p>
-      `;
-      }
-      send(mailOptions)
-      userMongoContainer.emptyCart(idUser)
-    });
-    socket.on("client: emptyCart", () =>{
-      userMongoContainer.emptyCart(idUser)
-    })
-  });
+const renderCart = async (req, res) => {
+  const userId = req.user.id;
+  const userDoc = await userMongoContainer.getOneDoc(userId);
+  const cart = userDoc.cart;
   res.render("cart", {
     cart,
+    userId
   });
 };
 
-const getAvatar = (req,res)=>{
+const postCart = async (req,res)=>{
+  const prodId = req.params.id
+  const prodDoc = await productMongoContainer.getOneDoc(prodId);
+  const userId = req.user.id;
+  const addProd = userMongoContainer.addProd(prodDoc, userId);
+  req.flash("addCartProduct", "Producto agregado al carrito.") 
+  res.redirect('/content/home')
+}
+
+const removeProduct = async (req,res)=>{
+  const prodId = req.params.id;
+  const userId = req.user.id;
+  const deleteProd = userMongoContainer.deleteProd(prodId, userId);
+  req.flash("cartAlert", "Producto eliminado.")
+  res.redirect("/content/cart");
+}
+
+const purchasedCart = async (req,res) =>{
+  const userId = req.user.id;
+  console.log(userId);
+  const userDoc = await userMongoContainer.getOneDoc(userId);
+  const cart = userDoc.cart;
+  const email = userDoc.email
+  mailOptions.subject = `Nuevo pedido de ${email}`
+  for (const product of cart) {
+    mailOptions.html +=`
+    <ul>
+      <li>Nombre del producto: ${product.title}, Precio: $${product.price}</li>
+    </ul>
+  `
+  }
+  sendEmail(mailOptions);
+  const emptyCart = userMongoContainer.emptyCart(userId);
+  req.flash("cartAlert", "Pedido realizado, gracias por su compra!")
+  res.redirect('/content/cart')
+}
+
+const emptyCart = async (req,res)=>{
+  const userId = req.user.id;
+  const emptyCart = userMongoContainer.emptyCart(userId);
+  req.flash("cartAlert", "Su carrito se vació con exito");
+  res.redirect("/content/cart")
+}
+
+const renderAvatar = (req,res)=>{
   const avatar = req.user.avatar;
   res.render('avatar', avatar)
 }
 
-const getLogout = (req, res) => {
+const renderLogout = (req, res) => {
   const user = req.user.user;
   res.render("logout", {
     userLogout: user,
@@ -163,15 +182,19 @@ const loginError = (req, res) => {
 };
 
 export {
-  getLogin,
+  renderLogin,
   postLogin,
-  getRegister,
+  renderRegister,
   postRegister,
   adminAddProds,
-  getHomePage,
-  getUserProfile,
-  getCart,
-  getAvatar,
-  getLogout,
+  renderHomePage,
+  renderUserProfile,
+  renderCart,
+  postCart,
+  removeProduct,
+  purchasedCart,
+  emptyCart,
+  renderAvatar,
+  renderLogout,
   loginError,
 };

@@ -48,8 +48,8 @@ app.use(
       mongoOptions: advancedOptions,
     }),
     secret: "shhhh",
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
     cookie: {
       maxAge: 600000,
     },
@@ -61,6 +61,8 @@ app.use(passport.session());
 app.use(flash());
 app.use((req, res, next) => {
   res.locals.error = req.flash("error");
+  res.locals.addCartProduct = req.flash("addCartProduct");
+  res.locals.cartAlert = req.flash("cartAlert");
   next();
 });
 //SET HBS

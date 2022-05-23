@@ -1,9 +1,9 @@
 import {
-  getLogin,
+  renderLogin,
   postLogin,
-  getRegister,
+  renderRegister,
   postRegister,
-  getLogout,
+  renderLogout,
   loginError,
 } from "../controllers/functions";
 import { checkAuthentication } from "../controllers/middlewares";
@@ -12,15 +12,15 @@ const { Router } = express;
 
 const userRoutes = Router();
 
-userRoutes.get("/login", getLogin);
+userRoutes.get("/login", renderLogin);
 
 userRoutes.post("/login", postLogin);
 
-userRoutes.get("/register", getRegister);
+userRoutes.get("/register", renderRegister);
 
 userRoutes.post("/register", postRegister);
 
-userRoutes.get("/logout", checkAuthentication, getLogout);
+userRoutes.get("/logout", checkAuthentication, renderLogout);
 
 userRoutes.get("/loginError", loginError);
 
