@@ -2,7 +2,7 @@ import {
   renderLogin,
   postLogin,
   renderRegister,
-  postRegister,
+  newUserRegister,
   renderLogout,
   loginError,
 } from "../controllers/functions";
@@ -18,7 +18,7 @@ userRoutes.post("/login", postLogin);
 
 userRoutes.get("/register", renderRegister);
 
-userRoutes.post("/register", postRegister);
+userRoutes.post("/register", newUserRegister);
 
 userRoutes.get("/logout", checkAuthentication, renderLogout);
 

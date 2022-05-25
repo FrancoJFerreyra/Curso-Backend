@@ -9,7 +9,7 @@
             <div class="card-body">
                 <h5 class="card-title">{{title}}</h5>
                 <p class="card-text">{{description}}</p>
-                <button type="submit" class="btnRemoveProd btn btn-primary">delete</button>
+                <button type="submit" class="btnRemoveProd btn btn-danger">delete</button>
                 <p class="card-text">${{price}}</p>
             </div>
         </div>
@@ -18,13 +18,13 @@
 {{/each}}
 <div>
     <a href="/content/cart/purchased">
-        <button type="submit" id="buyCart">Comprar</button>
+        <button class="btn btn-success" type="submit" id="buyCart">Comprar</button>
     </a>
 </div>
 <div>
-    <form action="/content/cart/empty" method="post">
-        <button type="submit" id="emptyCart">Vaciar carrito</button>
-    </form>
+    <a href="/content/cart/empty">
+        <button class="btn btn-danger" type="submit" id="emptyCart">Vaciar carrito</button>
+    </a>
 </div>
 {{else}}
 <h1 class="text-danger">Aun no hay productos</h1>

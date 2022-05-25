@@ -6,9 +6,9 @@ const authToken = process.env.TWILIOTOKEN
 
 const client = twilio(accountSid, authToken)
 
-const options = {
+const whatsappOptions = {
     body: '',
-    from: 'whatsapp:+17472944153',
+    from: 'whatsapp:+14155238886',
     to: 'whatsapp:+5491136341658'
 }
 
@@ -21,6 +21,6 @@ const sendWhatsapp = async (messageOptions) =>{
 }
 }
 export {
-    options,
+    whatsappOptions,
     sendWhatsapp
 }

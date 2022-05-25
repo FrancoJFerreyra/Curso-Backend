@@ -3,6 +3,9 @@ const { Router } = express;
 import { Server as webSocketServer } from "socket.io";
 import http from "http";
 
+import cluster from "cluster";
+import { cpus } from "os";
+
 import userRouter from "./src/routers/user.routes";
 import contentRouter from "./src/routers/content.routes";
 import adminRouter from "./src/routers/admin.routes";
@@ -11,14 +14,12 @@ import session from "express-session";
 import cookieParser from "cookie-parser";
 import mongoStore from "connect-mongo";
 
-import passportFile from "./src/bussines/passport";
+import passportFile from "./src/business/passport";
 import passport from "passport";
 
 import flash from "connect-flash";
 
-import loggerW from "./src/winston";
-
-const util = require("util");
+import _loggerW from "./src/config/winston";
 
 require("dotenv").config();
 
@@ -26,12 +27,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new webSocketServer(server);
 
-const req = require("express/lib/request");
-const res = require("express/lib/response");
-
 import path from "path";
-
-const PORT = process.env.PORT || 3000;
 
 //SET COOKIES
 const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true };
@@ -55,16 +51,18 @@ app.use(
     },
   })
 );
-//Passport debe inicializarse luego de session
+
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 app.use((req, res, next) => {
   res.locals.error = req.flash("error");
   res.locals.addCartProduct = req.flash("addCartProduct");
+  res.locals.deleteProd = req.flash("deleteProd")
   res.locals.cartAlert = req.flash("cartAlert");
   next();
 });
+
 //SET HBS
 const expHbs = require("express-handlebars");
 import handlebars from "handlebars";
@@ -88,14 +86,34 @@ welcomeRouter.get("/", (req, res) => {
   res.render("welcome");
 });
 
-app.use("/", welcomeRouter);
-app.use("/content", contentRouter);
-app.use("/user", userRouter);
-app.use("/admin", adminRouter);
+//SET CLUSTER 
+const clusterMode = process.argv[2] == "CLUSTER"
+const numCPUs = cpus().length;
 
-server.listen(PORT, () => {
-  console.log(`Se inicio el server en el puerto: ${PORT}`);
-});
-// server.on('error', error => {loggerW.fatal(error)})
+if (clusterMode && cluster.isPrimary) {
+  _loggerW.info(`Num CPUs = ${numCPUs}`);
+  _loggerW.info(`PID MASTER = ${process.pid}`)
+
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork()
+  }
+  cluster.on("exit", worker =>{
+    _loggerW.info("Worker", worker.process.pid, "died", new Date().toLocaleString());
+    cluster.fork();
+  })
+}
+else{
+  const PORT = process.env.PORT || 3000;
+  
+  app.use("/", welcomeRouter);
+  app.use("/content", contentRouter);
+  app.use("/user", userRouter);
+  app.use("/admin", adminRouter);
+  
+  server.listen(PORT, () => {
+  _loggerW.info(`Se inicio el server en el puerto: ${PORT}, PID = ${process.pid}`);
+  });
+server.on('error', error => {_loggerW.error(error)});
+}
 
 export  {io};

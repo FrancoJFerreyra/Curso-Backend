@@ -1,12 +1,13 @@
 import mongoose from "mongoose";
-import bussines from "../config/DBconfig";
+import config from "../config/DBconfig";
+import _loggerW from "../config/winston";
 
 (async () => {
   try {
-    const db = await mongoose.connect(bussines.mongoRemote.cnxStr);
-    await console.log("DB connected");
+    const db = await mongoose.connect(config.mongoRemote.cnxStr);
+    _loggerW.info(`DB connected, PID = ${process.pid}`);
   } catch (err) {
-    console.log(err);
+    _loggerW.error(err);
   }
 })();
 
@@ -19,9 +20,9 @@ class mongoContainer {
     user.password = await user.encryptPassword(user.password);
     try {
       await user.save();
-      console.log(`Usuario guardado : ${newUser.email}`);
+      _loggerW.info(`Usuario guardado : ${newUser.email}, password encriptado con exito.`);
     } catch (err) {
-      console.log(err);
+      _loggerW.error(err);
     }
   };
 
@@ -30,70 +31,75 @@ class mongoContainer {
       { _id: id },
       { role: 2 }
     );
+    _loggerW.info(`Usuario con id ${id} convertido en admin.`)
   };
 
   getOneDoc = async (id) => {
     const product = await this.model.findById({ _id: id }); 
-    console.log('Producto requerido', product._id);
+    _loggerW.info(`Id del producto requerido de la base de datos : ${product._id}`);
     return product;
   };
 
   listarAll = async () => {
     const products = await this.model.find();
+    _loggerW.info("Productos listados para renderizar en home.")
     return products;
   };
 
   save = async (data) => {
-    console.log("data recibied", data);
+    _loggerW.info(`data recibida ${data}` );
     const product = new this.model(data);
     try {
       await product.save();
-      console.log("data saved", product);
+      _loggerW.info("Producto agregado a la DB por admin.");
     } catch (err) {
-      console.log(err);
+      _loggerW.error(err);
     }
   };
 
   addProd = async (prod, idUser) => {
     const user = await this.model.findById({ _id: idUser });
-    user.cart.push(prod);
+    const cart = user.cart;
+    const find = cart.find(e => e._id == prod.id);
+    if (!find) {
+      user.cart.push(prod);
+    }
     try {
       user.save();
-      console.log(`Producto agregado: ${prod.title}`);
+      _loggerW.info(`Producto agregado al carrito: ${prod.title}`);
     } catch (err) {
-      console.log(err);
+      _loggerW.error(err);
     }
   };
 
   deleteProd = async (idProd, userId ) => {
     const user = await this.model.findById({ _id: userId });
-    console.log(`Cart : ${userId}, product : ${idProd}`);
+    _loggerW.info(`Cart : ${userId}, product : ${idProd}`);
     const products = user.cart;
     const find = products.findIndex((e) => e._id == idProd);
-    console.log(find);
+    _loggerW.info(`Index del producto encontrado : ${find}`);
     products.splice(find, 1);
     try {
       await this.model.updateOne(
         { _id: userId },
         { $set: { cart: products } }
       );
-      console.log(`Producto con id: ${idProd} fue eliminado`);
+      _loggerW.info(`Producto con id: ${idProd} fue eliminado`);
     } catch (err) {
-      console.log(err);
+      _loggerW.error(err);
     }
   };
 
   emptyCart = async (userId)=>{
-    console.log('id user', userId);
     try {
       await this.model.updateOne(
         { _id: userId },
         { $set: { cart: [] } }
       );
-      console.log(`Carrito vaciado`);
+      _loggerW.info(`Carrito vaciado`);
     }
     catch (err){
-      console.log(err);
+      _loggerW.error(err);
     }
   }
 }

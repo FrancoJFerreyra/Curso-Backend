@@ -3,7 +3,9 @@ import userMongoContainer from "../daos/userDao";
 import productMongoContainer from "../daos/productsDao";
 import { io } from "../../express";
 import { sendEmail, mailOptions } from "../msjs/nodemailer";
-import { sendWhatsapp, options } from "../msjs/whatsapp";
+import { sendWhatsapp, whatsappOptions } from "../msjs/whatsapp";
+import { messageTextOptions, sendTextMessage } from "../msjs/textMsj";
+import _loggerW from "../config/winston";
 
 const renderLogin = (req, res) => {
   res.render("login");
@@ -18,19 +20,12 @@ const renderRegister = (req, res) => {
   res.render("register");
 };
 
-const postRegister = async (req, res) => {
+const newUserRegister = async (req, res) => {
   const errors = [];
-  const {
-    avatar,
-    email,
-    direction,
-    user,
-    lastname,
-    age,
-    phone,
-    password,
-    role,
-  } = req.body;
+  const full_phone = req.body.full_phone;
+    _loggerW.info(`FULLPHONE: ${full_phone}`)
+  const { avatar, email, direction, user, lastname, age, password, role } =
+    req.body;
   if (password.length < 4) {
     errors.push({ text: "La contraseña debe contar con 4 o mas caracteres." });
   }
@@ -39,8 +34,10 @@ const postRegister = async (req, res) => {
       errors,
     });
   } else {
-    mailOptions.subject = 'Nuevo registro';
-    mailOptions.html = `
+    const saveUser = userMongoContainer.saveNewUser({ ...req.body, phone: full_phone, role: 1 });
+    if (saveUser) {
+      mailOptions.subject = "Nuevo registro";
+      mailOptions.html = `
   <table>
     <thead>
             <tr>
@@ -60,14 +57,13 @@ const postRegister = async (req, res) => {
       <td>${user}</td>
       <td>${lastname}</td>
       <td>${age}</td>
-      <td>${phone}</td>
+      <td>${full_phone}</td>
     </tr>
     </table>
     `;
-    sendEmail(mailOptions);
-    res.redirect("/content/home");
-    console.log({ ...req.body, role: 1 });
-    userMongoContainer.saveNewUser({ ...req.body, role: 1 });
+      sendEmail(mailOptions);
+      res.redirect("/content/home");
+    }
   }
 };
 
@@ -82,17 +78,39 @@ const adminAddProds = (req, res) => {
   res.render("addProds");
 };
 
+const isPrime = (num) => {
+  if ([2, 3].includes(num)) return true;
+  else if ([2, 3].some((n) => num % n == 0)) return false;
+  else {
+    let i = 5,
+      w = 2;
+    while (i ** 2 <= num) {
+      if (num % i == 0) return false;
+      i += w;
+      w = 6 - w;
+    }
+  }
+  return true;
+};
+
 const renderHomePage = async (req, res) => {
   const products = await productMongoContainer.listarAll();
+  // const primes = [];
+  // const max = 1000;
+  // for (let i = 1; i <= max; i++) {
+  //   if (isPrime(i)) primes.push(i);
+  // }
+  // res.json(primes);
+
   if (req.user.role == 2) {
     const admin = req.user.role;
     res.render("index", {
       admin,
-      products
+      products,
     });
   } else {
     res.render("index", {
-      products
+      products,
     });
   }
 };
@@ -116,58 +134,65 @@ const renderCart = async (req, res) => {
   const cart = userDoc.cart;
   res.render("cart", {
     cart,
-    userId
+    userId,
   });
 };
 
-const postCart = async (req,res)=>{
-  const prodId = req.params.id
+const addProductsToCart = async (req, res) => {
+  const prodId = req.params.id;
   const prodDoc = await productMongoContainer.getOneDoc(prodId);
   const userId = req.user.id;
   const addProd = userMongoContainer.addProd(prodDoc, userId);
-  req.flash("addCartProduct", "Producto agregado al carrito.") 
-  res.redirect('/content/home')
-}
+  req.flash("addCartProduct", "Producto agregado al carrito.");
+  res.redirect("/content/home");
+};
 
-const removeProduct = async (req,res)=>{
+const removeProduct = async (req, res) => {
   const prodId = req.params.id;
   const userId = req.user.id;
   const deleteProd = userMongoContainer.deleteProd(prodId, userId);
-  req.flash("cartAlert", "Producto eliminado.")
+  req.flash("deleteProd", "Producto eliminado.");
   res.redirect("/content/cart");
-}
+};
 
-const purchasedCart = async (req,res) =>{
+const purchasedCart = async (req, res) => { 
   const userId = req.user.id;
-  console.log(userId);
   const userDoc = await userMongoContainer.getOneDoc(userId);
-  const cart = userDoc.cart;
-  const email = userDoc.email
-  mailOptions.subject = `Nuevo pedido de ${email}`
-  for (const product of cart) {
-    mailOptions.html +=`
-    <ul>
-      <li>Nombre del producto: ${product.title}, Precio: $${product.price}</li>
-    </ul>
-  `
-  }
+  const {cart,email, user, phone} = userDoc;
+  const subject = `Nuevo pedido de nombre ${user}, email: ${email}. `;
+  mailOptions.subject = subject;
+    for (const product of cart) {
+      mailOptions.html += `
+        <ul>
+          <li>Nombre del producto: ${product.title}, Precio: $${product.price}</li>
+        </ul>
+      `;
+    };
   sendEmail(mailOptions);
+  _loggerW.info("Email enviado");
+  whatsappOptions.body = subject;
+  sendWhatsapp(whatsappOptions);
+  messageTextOptions.body =
+    "Su pedido se ha confirmado y esta siendo procesado.";
+  messageTextOptions.to += phone;
+  _loggerW.info(`MessageOptions ${messageTextOptions}`)
+  sendTextMessage(messageTextOptions);
   const emptyCart = userMongoContainer.emptyCart(userId);
-  req.flash("cartAlert", "Pedido realizado, gracias por su compra!")
-  res.redirect('/content/cart')
-}
+  req.flash("cartAlert", "Pedido realizado, gracias por su compra!");
+  res.redirect("/content/cart");
+};
 
-const emptyCart = async (req,res)=>{
+const emptyCart = async (req, res) => {
   const userId = req.user.id;
   const emptyCart = userMongoContainer.emptyCart(userId);
   req.flash("cartAlert", "Su carrito se vació con exito");
-  res.redirect("/content/cart")
-}
+  res.redirect("/content/cart");
+};
 
-const renderAvatar = (req,res)=>{
+const renderAvatar = (req, res) => {
   const avatar = req.user.avatar;
-  res.render('avatar', avatar)
-}
+  res.render("avatar", avatar);
+};
 
 const renderLogout = (req, res) => {
   const user = req.user.user;
@@ -185,12 +210,12 @@ export {
   renderLogin,
   postLogin,
   renderRegister,
-  postRegister,
+  newUserRegister,
   adminAddProds,
   renderHomePage,
   renderUserProfile,
   renderCart,
-  postCart,
+  addProductsToCart,
   removeProduct,
   purchasedCart,
   emptyCart,
