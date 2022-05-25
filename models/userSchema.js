@@ -3,15 +3,15 @@ import bcrypt from 'bcrypt';
 import products from './productsSchema'
 
 const userSchema = new Schema({
-    avatar:{ type: String, required: true },
+    avatar:{ type: String, required: true , unique: false},
     email: { type: String, required: true, unique: true },
-    direction: { type: String, required: true},
-    user: { type: String, required: true},
-    lastname: { type: String, required: true },
-    age: { type: Number, required: true },
+    direction: { type: String, required: true, unique: false},
+    user: { type: String, required: true, unique: false},
+    lastname: { type: String, required: true, unique: false},
+    age: { type: Number, required: true, unique: false },
     phone: { type: Number, required: true, unique: true },
-    password: { type: String, required: true},
-    role: {type: Number, required: true},
+    password: { type: String, required: true, unique: false},
+    role: {type: Number, required: true, unique: false},
     cart: [products.productSchema]
 });
 
