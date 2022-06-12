@@ -21,8 +21,10 @@ class mongoContainer {
     try {
       await user.save();
       _loggerW.info(`Usuario guardado : ${newUser.email}, password encriptado con exito.`);
+      return true
     } catch (err) {
       _loggerW.error(err);
+      return false
     }
   };
 

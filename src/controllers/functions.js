@@ -1,43 +1,43 @@
-import passport from "passport";
-import userMongoContainer from "../daos/userDao";
-import productMongoContainer from "../daos/productsDao";
-import { io } from "../../express";
-import { sendEmail, mailOptions } from "../msjs/nodemailer";
-import { sendWhatsapp, whatsappOptions } from "../msjs/whatsapp";
-import { messageTextOptions, sendTextMessage } from "../msjs/textMsj";
-import _loggerW from "../config/winston";
+import passport from 'passport';
+import userMongoContainer from '../daos/userDao';
+import productMongoContainer from '../daos/productsDao';
+import { io } from '../express';
+import { sendEmail, mailOptions } from '../msjs/nodemailer';
+import { sendWhatsapp, whatsappOptions } from '../msjs/whatsapp';
+import { messageTextOptions, sendTextMessage } from '../msjs/textMsj';
+import _loggerW from '../config/winston';
 
 const renderLogin = (req, res) => {
-  res.render("login");
+	res.render('login');
 };
-const postLogin = passport.authenticate("login", {
-  failureRedirect: "/user/loginError",
-  successRedirect: "/content/home",
-  failureFlash: true,
+const postLogin = passport.authenticate('login', {
+	failureRedirect: '/user/loginError',
+	successRedirect: '/content/home',
+	failureFlash: true,
 });
 
 const renderRegister = (req, res) => {
-  res.render("register");
+	res.render('register');
 };
 
 const newUserRegister = async (req, res) => {
-  const errors = [];
-  const full_phone = req.body.full_phone;
-    _loggerW.info(`FULLPHONE: ${full_phone}`)
-  const { avatar, email, direction, user, lastname, age, password, role } =
-    req.body;
-  if (password.length < 4) {
-    errors.push({ text: "La contraseña debe contar con 4 o mas caracteres." });
-  }
-  if (errors.length > 0) {
-    res.render("register", {
-      errors,
-    });
-  } else {
-    const saveUser = userMongoContainer.saveNewUser({ ...req.body, phone: full_phone, role: 1 });
-    if (saveUser) {
-      mailOptions.subject = "Nuevo registro";
-      mailOptions.html = `
+	const errors = [];
+	const full_phone = req.body.full_phone;
+	_loggerW.info(`FULLPHONE: ${full_phone}`);
+	_loggerW.info(`${req.body.username}`);
+	const { avatar, email, direction, username, lastname, age, password, role } = req.body;
+	if (password.length < 4) {
+		errors.push({ text: 'La contraseña debe contar con 4 o mas caracteres.' });
+	}
+	if (errors.length > 0) {
+		res.render('register', {
+			errors,
+		});
+	} else {
+		const saveUser = userMongoContainer.saveNewUser({ ...req.body, phone: full_phone, role: 1 });
+		if (await saveUser) {
+			mailOptions.subject = 'Nuevo registro';
+			mailOptions.html = `
   <table>
     <thead>
             <tr>
@@ -52,174 +52,155 @@ const newUserRegister = async (req, res) => {
             </tr>
         </thead>
     <tr>
+		<td><img src="${avatar}"></td>
       <td>${email}</td>
       <td>${direction}</td>
-      <td>${user}</td>
+      <td>${username}</td>
       <td>${lastname}</td>
       <td>${age}</td>
       <td>${full_phone}</td>
+	  <td>${role}</td>
     </tr>
     </table>
     `;
-      sendEmail(mailOptions);
-      res.redirect("/content/home");
-    }
-  }
+			sendEmail(mailOptions);
+			res.redirect('/content/home');
+		} else {
+			res.render('error');
+		}
+	}
 };
 
 const adminAddProds = (req, res) => {
-  io.on("connection", (socket) => {
-    socket.on("client:newProduct", (data) => {
-      console.log("llego data al server");
-      productMongoContainer.save(data);
-      socket.emit("server:newProduct", data);
-    });
-  });
-  res.render("addProds");
-};
-
-const isPrime = (num) => {
-  if ([2, 3].includes(num)) return true;
-  else if ([2, 3].some((n) => num % n == 0)) return false;
-  else {
-    let i = 5,
-      w = 2;
-    while (i ** 2 <= num) {
-      if (num % i == 0) return false;
-      i += w;
-      w = 6 - w;
-    }
-  }
-  return true;
+	io.on('connection', (socket) => {
+		socket.on('client:newProduct', (data) => {
+			console.log('llego data al server');
+			productMongoContainer.save(data);
+			socket.emit('server:newProduct', data);
+		});
+	});
+	res.render('addProds');
 };
 
 const renderHomePage = async (req, res) => {
-  const products = await productMongoContainer.listarAll();
-  // const primes = [];
-  // const max = 1000;
-  // for (let i = 1; i <= max; i++) {
-  //   if (isPrime(i)) primes.push(i);
-  // }
-  // res.json(primes);
-
-  if (req.user.role == 2) {
-    const admin = req.user.role;
-    res.render("index", {
-      admin,
-      products,
-    });
-  } else {
-    res.render("index", {
-      products,
-    });
-  }
+	const products = await productMongoContainer.listarAll();
+	if (req.user.role == 2) {
+		const admin = req.user.role;
+		res.render('index', {
+			admin,
+			products,
+		});
+	} else {
+		res.render('index', {
+			products,
+		});
+	}
 };
 
 const renderUserProfile = (req, res) => {
-  const { avatar, email, direction, user, lastname, age, phone } = req.user;
-  res.render("profile", {
-    avatar,
-    email,
-    direction,
-    user,
-    lastname,
-    age,
-    phone,
-  });
+	const { avatar, email, direction, username, lastname, age, phone } = req.user;
+	res.render('profile', {
+		avatar,
+		email,
+		direction,
+		username,
+		lastname,
+		age,
+		phone,
+	});
 };
 
 const renderCart = async (req, res) => {
-  const userId = req.user.id;
-  const userDoc = await userMongoContainer.getOneDoc(userId);
-  const cart = userDoc.cart;
-  res.render("cart", {
-    cart,
-    userId,
-  });
+	const userId = req.user.id;
+	const userDoc = await userMongoContainer.getOneDoc(userId);
+	const cart = userDoc.cart;
+	res.render('cart', {
+		cart,
+		userId,
+	});
 };
 
 const addProductsToCart = async (req, res) => {
-  const prodId = req.params.id;
-  const prodDoc = await productMongoContainer.getOneDoc(prodId);
-  const userId = req.user.id;
-  const addProd = userMongoContainer.addProd(prodDoc, userId);
-  req.flash("addCartProduct", "Producto agregado al carrito.");
-  res.redirect("/content/home");
+	const prodId = req.params.id;
+	const prodDoc = await productMongoContainer.getOneDoc(prodId);
+	const userId = req.user.id;
+	const addProd = userMongoContainer.addProd(prodDoc, userId);
+	req.flash('addCartProduct', 'Producto agregado al carrito.');
+	res.redirect('/content/home');
 };
 
 const removeProduct = async (req, res) => {
-  const prodId = req.params.id;
-  const userId = req.user.id;
-  const deleteProd = userMongoContainer.deleteProd(prodId, userId);
-  req.flash("deleteProd", "Producto eliminado.");
-  res.redirect("/content/cart");
+	const prodId = req.params.id;
+	const userId = req.user.id;
+	const deleteProd = userMongoContainer.deleteProd(prodId, userId);
+	req.flash('deleteProd', 'Producto eliminado.');
+	res.redirect('/content/cart');
 };
 
-const purchasedCart = async (req, res) => { 
-  const userId = req.user.id;
-  const userDoc = await userMongoContainer.getOneDoc(userId);
-  const {cart,email, user, phone} = userDoc;
-  const subject = `Nuevo pedido de nombre ${user}, email: ${email}. `;
-  mailOptions.subject = subject;
-    for (const product of cart) {
-      mailOptions.html += `
+const purchasedCart = async (req, res) => {
+	const userId = req.user.id;
+	const userDoc = await userMongoContainer.getOneDoc(userId);
+	const { cart, email, username, phone } = userDoc;
+	const subject = `Nuevo pedido de nombre ${username}, email: ${email}. `;
+	mailOptions.subject = subject;
+	for (const product of cart) {
+		mailOptions.html += `
         <ul>
           <li>Nombre del producto: ${product.title}, Precio: $${product.price}</li>
         </ul>
       `;
-    };
-  sendEmail(mailOptions);
-  _loggerW.info("Email enviado");
-  whatsappOptions.body = subject;
-  sendWhatsapp(whatsappOptions);
-  messageTextOptions.body =
-    "Su pedido se ha confirmado y esta siendo procesado.";
-  messageTextOptions.to += phone;
-  _loggerW.info(`MessageOptions ${messageTextOptions}`)
-  sendTextMessage(messageTextOptions);
-  const emptyCart = userMongoContainer.emptyCart(userId);
-  req.flash("cartAlert", "Pedido realizado, gracias por su compra!");
-  res.redirect("/content/cart");
+	}
+	sendEmail(mailOptions);
+	_loggerW.info('Email enviado');
+	whatsappOptions.body = subject;
+	sendWhatsapp(whatsappOptions);
+	messageTextOptions.body = 'Su pedido se ha confirmado y esta siendo procesado.';
+	messageTextOptions.to += phone;
+	_loggerW.info(`MessageOptions ${messageTextOptions}`);
+	sendTextMessage(messageTextOptions);
+	const emptyCart = userMongoContainer.emptyCart(userId);
+	req.flash('cartAlert', 'Pedido realizado, gracias por su compra!');
+	res.redirect('/content/cart');
 };
 
 const emptyCart = async (req, res) => {
-  const userId = req.user.id;
-  const emptyCart = userMongoContainer.emptyCart(userId);
-  req.flash("cartAlert", "Su carrito se vació con exito");
-  res.redirect("/content/cart");
+	const userId = req.user.id;
+	const emptyCart = userMongoContainer.emptyCart(userId);
+	req.flash('cartAlert', 'Su carrito se vació con exito');
+	res.redirect('/content/cart');
 };
 
 const renderAvatar = (req, res) => {
-  const avatar = req.user.avatar;
-  res.render("avatar", avatar);
+	const avatar = req.user.avatar;
+	res.render('avatar', avatar);
 };
 
 const renderLogout = (req, res) => {
-  const user = req.user.user;
-  res.render("logout", {
-    userLogout: user,
-  });
-  req.session.destroy();
+	const user = req.user.username;
+	res.render('logout', {
+		userLogout: user,
+	});
+	req.session.destroy();
 };
 
 const loginError = (req, res) => {
-  res.render("error");
+	res.render('error');
 };
 
 export {
-  renderLogin,
-  postLogin,
-  renderRegister,
-  newUserRegister,
-  adminAddProds,
-  renderHomePage,
-  renderUserProfile,
-  renderCart,
-  addProductsToCart,
-  removeProduct,
-  purchasedCart,
-  emptyCart,
-  renderAvatar,
-  renderLogout,
-  loginError,
+	renderLogin,
+	postLogin,
+	renderRegister,
+	newUserRegister,
+	adminAddProds,
+	renderHomePage,
+	renderUserProfile,
+	renderCart,
+	addProductsToCart,
+	removeProduct,
+	purchasedCart,
+	emptyCart,
+	renderAvatar,
+	renderLogout,
+	loginError,
 };
