@@ -1,0 +1,60 @@
+import _loggerW from './config/winston.js';
+import axios from 'axios';
+
+const img = `data:image/jpeg;base64,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`;
+
+const renderHomePage = async () => {
+	try {
+		const response = await axios.get('http://localhost:3000/content/home');
+		_loggerW.info(JSON.stringify(response.data));
+	} catch (error) {
+		_loggerW.error(`ERROR = ${error}`);
+	}
+};
+// renderHomePage()
+
+const addProd = async (data) => {
+	try {
+		const response = await axios.post('http://localhost:3000/admin/addProds', data);
+		_loggerW.info(response);
+	} catch (error) {
+		_loggerW.error(`ERROR = ${error}`);
+	}
+};
+
+// addProd({
+// 	title: 'Zapass',
+// 	description: 'Zapas blancas',
+// 	img: img,
+// 	price: 800,
+// 	stock: 3,
+// });
+
+const deleteProd = async (id) =>{
+    try {
+        const response = await axios.post('http://localhost:3000/admin/deleteProds', id);
+        _loggerW.info(response.data)
+    } catch (error) {
+        _loggerW.error(error)
+    }
+}
+
+// deleteProd({id:'62a5ee77bf9112470d2d370e'});
+
+const updateProd = async(data) =>{
+    try {
+        const response = await axios.post('http://localhost:3000/admin/updateProd',data);
+        _loggerW.info(response.data)
+    } catch (error) {
+        _loggerW.error(error)
+    }
+}
+
+updateProd({
+    id:'62a5f757a6a172a0238688fc',
+    title: 'Zapatillas',
+	description: 'Zapas negras',
+	img: img,
+	price: 900,
+	stock: 1,
+});

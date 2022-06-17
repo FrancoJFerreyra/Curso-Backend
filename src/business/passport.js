@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
-import userModel from '../../models/userSchema';
-import mongoContainer from '../daos/userDao';
-import _loggerW from '../config/winston';
+import { userModel } from '../../models/userSchema.js';
+import mongoContainer from '../daos/userDao.js';
+import _loggerW from '../config/winston.js';
 
 passport.use(
 	'login',
@@ -45,3 +45,7 @@ passport.deserializeUser((id, done) => {
 		done(err, user);
 	});
 });
+
+export default{
+	passport
+}

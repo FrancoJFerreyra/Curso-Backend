@@ -6,22 +6,23 @@ import http from 'http';
 import cluster from 'cluster';
 import { cpus } from 'os';
 
-import userRouter from './routers/user.routes';
-import contentRouter from './routers/content.routes';
-import adminRouter from './routers/admin.routes';
+import userRouter from './routers/user.routes.js';
+import contentRouter from './routers/content.routes.js';
+import adminRouter from './routers/admin.routes.js';
 
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
 import mongoStore from 'connect-mongo';
-import passportFile from "./business/passport";
+import passportFile from './business/passport.js';
 import passport from 'passport';
 
 import flash from 'connect-flash';
-const util = require("util");
+import util from 'util';
 
-import _loggerW from './config/winston';
+import _loggerW from './config/winston.js';
 
-require('dotenv').config();
+import { config } from 'dotenv';
+config();
 
 const app = express();
 const server = http.createServer(app);
@@ -61,14 +62,11 @@ app.use((req, res, next) => {
 });
 
 //SET HBS
-import {engine as expHbs} from 'express-handlebars';
-import { engineConf,publicPath,views } from '../public/configHbs'
-app.use(express.static(publicPath))
+import { engine as expHbs } from 'express-handlebars';
+import { engineConf, publicPath, views } from '../public/configHbs.js';
+app.use(express.static(publicPath));
 console.log(publicPath);
-app.engine(
-	'.hbs',
-	expHbs(engineConf)
-);
+app.engine('.hbs', expHbs(engineConf));
 app.set('view engine', '.hbs');
 app.set('views', views);
 
@@ -109,6 +107,6 @@ if (clusterMode && cluster.isPrimary) {
 	});
 }
 
-export { io };
+export { io, app};
 
 //ARTILLERY artillery quick --count 50 -n 40 http://localhost:3000/content/home > result_CLUSTER

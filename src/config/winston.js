@@ -1,4 +1,9 @@
 import winston from 'winston';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const _loggerW = winston.createLogger({
 	format: winston.format.combine(winston.format.simple()),
@@ -11,4 +16,4 @@ const _loggerW = winston.createLogger({
 	],
 });
 
-module.exports = _loggerW;
+export default _loggerW;

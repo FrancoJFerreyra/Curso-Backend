@@ -1,6 +1,5 @@
-import userModel from "../../models/userSchema";
-import mongoContainer from "../containers/mongoDb";
+import { userModel } from '../../models/userSchema.js';
+import mongoContainer from '../containers/mongoDb.js';
 const userApi = new mongoContainer(userModel);
 
-module.exports = userApi;
- 
+export default userApi;

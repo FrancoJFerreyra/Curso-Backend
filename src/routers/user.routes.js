@@ -5,8 +5,8 @@ import {
   newUserRegister,
   renderLogout,
   loginError,
-} from "../controllers/functions";
-import { checkAuthentication } from "../controllers/middlewares";
+} from "../controllers/login&registerCtrl.js";
+import { checkAuthentication } from "../controllers/middlewares.js";
 import express from "express";
 const { Router } = express;
 

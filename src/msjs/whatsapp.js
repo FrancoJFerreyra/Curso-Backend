@@ -1,6 +1,6 @@
 import twilio from 'twilio'
-require('dotenv').config()
-
+import { config } from 'dotenv'
+config()
 const accountSid = 'ACd6129e31aee633ca338aca03895c1055'
 const authToken = process.env.TWILIOTOKEN
 

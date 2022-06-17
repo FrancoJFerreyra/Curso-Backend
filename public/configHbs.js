@@ -1,7 +1,13 @@
 import express from 'express'
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import path from 'path';
 import { allowInsecurePrototypeAccess } from '@handlebars/allow-prototype-access';
 import handlebars from 'handlebars';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const engineConf = {
     extname: '.hbs',
 		layoutsDir: path.join(__dirname + '/layout'),
