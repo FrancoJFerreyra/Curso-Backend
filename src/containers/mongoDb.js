@@ -37,6 +37,7 @@ class mongoContainer {
 		try {
 			const deleted = await this.model.deleteOne({ _id: id });
 			_loggerW.info(`El producto con id : ${id} fue eliminado.`);
+			
 		} catch (err) {
 			_loggerW.error(err);
 		}
@@ -69,7 +70,7 @@ class mongoContainer {
 	};
 
 	save = async (data) => {
-		_loggerW.info(`data recibida ${data}`);
+		_loggerW.info(`data recibida ${data.title}`);
 		const product = new this.model(data);
 		try {
 			await product.save();

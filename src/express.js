@@ -21,12 +21,18 @@ import util from 'util';
 
 import _loggerW from './config/winston.js';
 
+import { graphConfig } from './controllers/graphql.js';
+
 import { config } from 'dotenv';
 config();
 
 const app = express();
 const server = http.createServer(app);
 const io = new webSocketServer(server);
+
+//SET GRAPHQL
+
+app.use('/graphql', graphConfig)
 
 //SET COOKIES
 const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true };

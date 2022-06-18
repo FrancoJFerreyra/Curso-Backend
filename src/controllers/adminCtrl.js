@@ -1,7 +1,7 @@
 import { io } from '../express.js';
 import productMongoContainer from '../daos/productsDao.js';
 import _loggerW from '../config/winston.js';
-const adminAddProds = (req, res) => {
+const adminAddProds = ( {input} ) => {
 	// io.on('connection', (socket) => {
 	// 	socket.on('client:newProduct', (data) => {
 	// 		console.log('llego data al server');
@@ -9,26 +9,18 @@ const adminAddProds = (req, res) => {
 	// 		socket.emit('server:newProduct', data);
 	// 	});
 	// });
-	const data = req.body;
+	const data = input;
 	productMongoContainer.save(data);
-	res.send('addProds');
+	return input;
 };
-const adminDeleteProd = async(req,res) =>{
-	const id = req.body.id
-	productMongoContainer.deleteProdDB(id);
-	res.send('deleted')
+const adminDeleteProd = ({_id}) =>{
+	console.log(_id);
+	return productMongoContainer.deleteProdDB(_id);
 }
-const adminUpdateProd = async (req,res) =>{
-	const {id, title, description, img, price, stock} = req.body;
-	const newProd = {
-		title,
-		description,
-		img,
-		price,
-		stock
-	}
-	productMongoContainer.updateProdDB(id, newProd);
-	res.send('Updated');
+const adminUpdateProd = ({_id ,input}) =>{
+	console.log(_id, input);
+	productMongoContainer.updateProdDB(_id, input);
+	return input
 }
 export {
 	adminAddProds,

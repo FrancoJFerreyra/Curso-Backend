@@ -5,11 +5,11 @@ import { sendWhatsapp, whatsappOptions } from '../msjs/whatsapp.js';
 import { messageTextOptions, sendTextMessage } from '../msjs/textMsj.js';
 import _loggerW from '../config/winston.js';
 
-const renderHomePage = async (req, res) => {
+const renderHomePage = async () => {
 	const products = await productMongoContainer.listarAll();
+	return products;
 	// if (req.user.role == 2) {
 	// 	const admin = req.user.role;
-		res.send(products)
 		// res.render('index', {
 		// 	admin,
 		// 	products,
