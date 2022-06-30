@@ -1,6 +1,7 @@
 {{>navbar}}
+{{>adminAlert}}
 {{#if addCartProduct}}
-<div role="alert" class="alert alert-success alert-dismissible fade show" >
+<div role="alert" class="alert alert-success alert-dismissible fade show">
   <strong>{{addCartProduct}}</strong>
   <button type="button" class="close btn" data-dismiss="alert" aria-label="Close">
     <span aria-hidden="true">&times;</span>
@@ -14,7 +15,26 @@
     <a href="/admin/addProds">
       <button>Agregar productos</button>
     </a>
-    {{/if}}
+    {{#each products}}
+    <div>
+      <div class="card" style="width: 18rem;">
+        <img src="{{img}}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">{{title}}</h5>
+          <p class="card-text">{{description}}</p>
+          <span>Id: {{_id}}</span>
+          <form action="/admin/updateProd/{{_id}}" method="get">
+            <button type="submit" class="btnAddToCart btn btn-warning">Editar</button>
+          </form>
+          <form action="/admin/deleteProd/{{_id}}" method="post">
+            <button type="submit" class="btnAddToCart btn btn-danger">Eliminar</button>
+          </form>
+          <p class="card-text">${{price}}</p>
+        </div>
+      </div>
+    </div>
+    {{/each}}
+    {{else}}
     {{#each products}}
     <div>
       <form action="/content/cart/{{_id}}" method="post">
@@ -31,5 +51,6 @@
       </form>
     </div>
     {{/each}}
+    {{/if}}
   </div>
 </div>

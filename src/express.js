@@ -21,18 +21,12 @@ import util from 'util';
 
 import _loggerW from './config/winston.js';
 
-import { graphConfig } from './controllers/graphql.js';
-
 import { config } from 'dotenv';
 config();
 
 const app = express();
 const server = http.createServer(app);
 const io = new webSocketServer(server);
-
-//SET GRAPHQL
-
-app.use('/graphql', graphConfig)
 
 //SET COOKIES
 const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true };
@@ -64,6 +58,7 @@ app.use((req, res, next) => {
 	res.locals.addCartProduct = req.flash('addCartProduct');
 	res.locals.deleteProd = req.flash('deleteProd');
 	res.locals.cartAlert = req.flash('cartAlert');
+	res.locals.adminAlert = req.flash('adminAlert');
 	next();
 });
 
@@ -71,7 +66,6 @@ app.use((req, res, next) => {
 import { engine as expHbs } from 'express-handlebars';
 import { engineConf, publicPath, views } from '../public/configHbs.js';
 app.use(express.static(publicPath));
-console.log(publicPath);
 app.engine('.hbs', expHbs(engineConf));
 app.set('view engine', '.hbs');
 app.set('views', views);

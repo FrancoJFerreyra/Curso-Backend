@@ -20,17 +20,21 @@ const newUserRegister = async (req, res) => {
 	const full_phone = req.body.full_phone;
 	_loggerW.info(`FULLPHONE: ${full_phone}`);
 	_loggerW.info(`${req.body.username}`);
-	const { avatar, email, direction, username, lastname, age, password, role } = req.body;
+	const { avatar, email, direction, username, lastname, age, password, confirmPsw } = req.body;
 	if (password.length < 4) {
 		errors.push({ text: 'La contraseña debe contar con 4 o mas caracteres.' });
+	}
+	if (password != confirmPsw) {
+		errors.push({text: 'Las contraseñas no coinciden.'})
 	}
 	if (errors.length > 0) {
 		res.render('register', {
 			errors,
 		});
 	} else {
-		const saveUser = userMongoContainer.saveNewUser({ ...req.body, phone: full_phone, role: 1 });
-		if (await saveUser) {
+		const user = {avatar, email, direction, username, lastname, age, password, phone: full_phone, role: 1};
+		const saveUser = await userMongoContainer.saveNewUser(user);
+		if (saveUser) {
 			mailOptions.subject = 'Nuevo registro';
 			mailOptions.html = `
   <table>
@@ -47,14 +51,14 @@ const newUserRegister = async (req, res) => {
             </tr>
         </thead>
     <tr>
-		<td><img src="${avatar}"></td>
-      <td>${email}</td>
-      <td>${direction}</td>
-      <td>${username}</td>
-      <td>${lastname}</td>
-      <td>${age}</td>
-      <td>${full_phone}</td>
-	  <td>${role}</td>
+		<td><img src="${user.avatar}"></td>
+      <td>${user.email}</td>
+      <td>${user.direction}</td>
+      <td>${user.username}</td>
+      <td>${user.lastname}</td>
+      <td>${user.age}</td>
+      <td>${user.full_phone}</td>
+	  <td>${user.role}</td>
     </tr>
     </table>
     `;

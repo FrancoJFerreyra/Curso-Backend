@@ -1,5 +1,9 @@
 {{>navbar}}
+{{#if update}}
+<h1>{{update}}</h1>
+{{else}}
 <h1>Ingrese el nuevo producto</h1>
+{{/if}}
 <form id="productsForm">
     <div class="form-group container">
         <label for="productName"><b>Nombre del producto</b></label>
@@ -46,4 +50,8 @@
 </div>
 <div>
     <script src="/socket.io/socket.io.min.js"></script>
+    {{#if update}}
+    <script src="../../clients/updateProdClient.js"></script>
+    {{else}}
     <script src="../clients/addProdsClient.js"></script> 
+    {{/if}}

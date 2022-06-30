@@ -37,25 +37,28 @@ class mongoContainer {
 		try {
 			const deleted = await this.model.deleteOne({ _id: id });
 			_loggerW.info(`El producto con id : ${id} fue eliminado.`);
-			
+			return true;
 		} catch (err) {
 			_loggerW.error(err);
+			return false;
 		}
 	};
-  updateProdDB = async (id, newData) => {
-    console.log(newData);
-    const updateProd = await this.model.replaceOne(
-      { _id: id },
-      {
-        title: newData.title,
-        description: newData.description,
-        img: newData.img,
-        price: newData.price,
-        stock: newData.stock,
-      }
-    );
-    console.log(updateProd);
-  };
+	updateProdDB = async (id, newData) => {
+		try {
+			const updateProd = await this.model.replaceOne(
+				{ _id: id },
+				{
+					title: newData.title,
+					description: newData.description,
+					img: newData.img,
+					price: newData.price,
+					stock: newData.stock,
+				}
+			);
+		} catch (err) {
+			_loggerW.info(err);
+		}
+	};
 
 	getOneDoc = async (id) => {
 		const product = await this.model.findById({ _id: id });

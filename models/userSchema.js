@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
-import { productSchema } from './productsSchema.js'
+import { productSchema } from './productsSchema.js';
 
 const userSchema = new mongoose.Schema({
     avatar:{ type: String, required: true , unique: false},

@@ -26,6 +26,7 @@ productForm.addEventListener("submit", (e) => {
 });
 socket.on("server:newProduct", (data) => {
   console.log("llego data al client");
+  tbody.innerHTML= ''
   tbody.innerHTML += `   
   <tr>
       <td>${data.title}</td>

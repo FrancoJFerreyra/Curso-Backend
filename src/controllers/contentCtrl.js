@@ -4,21 +4,21 @@ import { sendEmail, mailOptions } from '../msjs/nodemailer.js';
 import { sendWhatsapp, whatsappOptions } from '../msjs/whatsapp.js';
 import { messageTextOptions, sendTextMessage } from '../msjs/textMsj.js';
 import _loggerW from '../config/winston.js';
+import { io } from '../express.js';
 
-const renderHomePage = async () => {
+const renderHomePage = async (req, res) => {
 	const products = await productMongoContainer.listarAll();
-	return products;
-	// if (req.user.role == 2) {
-	// 	const admin = req.user.role;
-		// res.render('index', {
-		// 	admin,
-		// 	products,
-		// });
-	// } else {
-	// 	res.render('index', {
-	// 		products,
-	// 	});
-	// }
+	if (req.user.role == 2) {
+		const admin = req.user.role;
+		res.render('index', {
+			admin,
+			products,
+		});
+	} else {
+		res.render('index', {
+			products,
+		});
+	}
 };
 
 const renderUserProfile = (req, res) => {
@@ -94,11 +94,6 @@ const emptyCart = async (req, res) => {
 	res.redirect('/content/cart');
 };
 
-const renderAvatar = (req, res) => {
-	const avatar = req.user.avatar;
-	res.render('avatar', avatar);
-};
-
 export {
 	renderHomePage,
 	renderUserProfile,
@@ -107,5 +102,4 @@ export {
 	removeProduct,
 	purchasedCart,
 	emptyCart,
-	renderAvatar
 };
