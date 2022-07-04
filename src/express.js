@@ -55,10 +55,12 @@ app.use(passport.session());
 app.use(flash());
 app.use((req, res, next) => {
 	res.locals.error = req.flash('error');
+	res.locals.registerErr = req.flash('registerErr');
 	res.locals.addCartProduct = req.flash('addCartProduct');
 	res.locals.deleteProd = req.flash('deleteProd');
 	res.locals.cartAlert = req.flash('cartAlert');
 	res.locals.adminAlert = req.flash('adminAlert');
+	res.locals.adminErrAler = req.flash('adminErrAlert')
 	next();
 });
 
@@ -107,6 +109,3 @@ if (clusterMode && cluster.isPrimary) {
 	});
 }
 
-export { io, app};
-
-//ARTILLERY artillery quick --count 50 -n 40 http://localhost:3000/content/home > result_CLUSTER

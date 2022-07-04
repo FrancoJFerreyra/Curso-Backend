@@ -4,7 +4,6 @@ import { sendEmail, mailOptions } from '../msjs/nodemailer.js';
 import { sendWhatsapp, whatsappOptions } from '../msjs/whatsapp.js';
 import { messageTextOptions, sendTextMessage } from '../msjs/textMsj.js';
 import _loggerW from '../config/winston.js';
-import { io } from '../express.js';
 
 const renderHomePage = async (req, res) => {
 	const products = await productMongoContainer.listarAll();

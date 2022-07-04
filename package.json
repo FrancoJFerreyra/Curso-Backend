@@ -17,6 +17,7 @@
     "express-graphql": "^0.12.0",
     "express-handlebars": "^6.0.6",
     "express-session": "^1.17.2",
+    "express-validator": "^6.14.2",
     "graphql": "^16.5.0",
     "handlebars": "^4.7.7",
     "mongoose": "^6.2.9",

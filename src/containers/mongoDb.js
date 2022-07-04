@@ -24,7 +24,7 @@ class mongoContainer {
 			return true;
 		} catch (err) {
 			_loggerW.error(err);
-			return false;
+			return err.keyValue;
 		}
 	};
 
@@ -55,8 +55,10 @@ class mongoContainer {
 					stock: newData.stock,
 				}
 			);
+			return true
 		} catch (err) {
 			_loggerW.info(err);
+			return false
 		}
 	};
 
@@ -78,8 +80,10 @@ class mongoContainer {
 		try {
 			await product.save();
 			_loggerW.info('Producto agregado a la DB por admin.');
+			return true
 		} catch (err) {
 			_loggerW.error(err);
+			return false
 		}
 	};
 
@@ -87,8 +91,23 @@ class mongoContainer {
 		const user = await this.model.findById({ _id: idUser });
 		const cart = user.cart;
 		const find = cart.find((e) => e._id == prod.id);
-		if (!find) {
-			user.cart.push(prod);
+		if (find) {
+			const prodIndex = cart.findIndex((e) => e._id == prod.id);
+			const incrementQuantity = {
+				title: find.title,
+				description: find.description,
+				img: find.img,
+				price: find.price,
+				stock: find.stock,
+				quantity: find.quantity +1
+			}
+			cart[prodIndex] = incrementQuantity;
+			_loggerW.info(cart)
+		}
+		else{
+
+			const prodQuantity = {...prod._doc, quantity: 1}
+			cart.push(prodQuantity);
 		}
 		try {
 			user.save();

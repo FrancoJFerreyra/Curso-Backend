@@ -18,23 +18,32 @@ const renderRegister = (req, res) => {
 const newUserRegister = async (req, res) => {
 	const errors = [];
 	const full_phone = req.body.full_phone;
-	_loggerW.info(`FULLPHONE: ${full_phone}`);
-	_loggerW.info(`${req.body.username}`);
+	_loggerW.info(`User name: ${req.body.username}`);
 	const { avatar, email, direction, username, lastname, age, password, confirmPsw } = req.body;
 	if (password.length < 4) {
 		errors.push({ text: 'La contraseña debe contar con 4 o mas caracteres.' });
 	}
 	if (password != confirmPsw) {
-		errors.push({text: 'Las contraseñas no coinciden.'})
+		errors.push({ text: 'Las contraseñas no coinciden.' });
 	}
 	if (errors.length > 0) {
 		res.render('register', {
 			errors,
 		});
 	} else {
-		const user = {avatar, email, direction, username, lastname, age, password, phone: full_phone, role: 1};
+		const user = {
+			avatar,
+			email,
+			direction,
+			username,
+			lastname,
+			age,
+			password,
+			phone: full_phone,
+			role: 1,
+		};
 		const saveUser = await userMongoContainer.saveNewUser(user);
-		if (saveUser) {
+		if (saveUser == true) {
 			mailOptions.subject = 'Nuevo registro';
 			mailOptions.html = `
   <table>
@@ -63,9 +72,13 @@ const newUserRegister = async (req, res) => {
     </table>
     `;
 			sendEmail(mailOptions);
-			res.redirect('/content/home');
+			res.redirect('/user/login');
 		} else {
-			res.render('error');
+			req.flash(
+				'registerErr',
+				`La informacion ingresada: "${Object.values(saveUser)}" ya existe, ingrese otra.`
+			);
+			res.redirect('/user/register');
 		}
 	}
 };
@@ -79,11 +92,4 @@ const renderLogout = (req, res) => {
 	});
 	req.session.destroy();
 };
-export {
-	renderLogin,
-	postLogin,
-	renderRegister,
-	newUserRegister,
-    loginError,
-	renderLogout
-}
+export { renderLogin, postLogin, renderRegister, newUserRegister, loginError, renderLogout };

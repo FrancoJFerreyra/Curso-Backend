@@ -6,6 +6,7 @@
 		</button>
 	</div>
 {{/each}}
+{{>registerErr}}
 <form action="/user/register" method="post" class="d-flex flex-column align-items-center" onsubmit="process(event)">
     <div class="text-center d-flex flex-column justify-content-center w-25 p-3 align-items-center">
         <label for="avatar">Avatar</label>

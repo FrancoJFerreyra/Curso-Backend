@@ -1,57 +1,43 @@
 {{>navbar}}
-{{#if update}}
-<h1>{{update}}</h1>
-{{else}}
+{{>adminAlert}}
 <h1>Ingrese el nuevo producto</h1>
-{{/if}}
-<form id="productsForm">
+<form id="productsForm" action="/admin/addProds" method="post">
     <div class="form-group container">
-        <label for="productName"><b>Nombre del producto</b></label>
-        <input type="text" class="form-control container" name="productName" id="productName" placeholder="ej:Queso">
+        <label for="title"><b>Nombre del producto</b></label>
+        <input type="text" class="form-control container" name="title" placeholder="ej:Queso" required>
     </div>
     <div class="form-group container">
         <label for="description"><b>Descripción</b></label>
-        <input type="text" class="form-control container" name="description" id="description"
-            placeholder="ej:Queso roquefort 1kg">
+        <input type="text" class="form-control container" name="description" placeholder="ej:Queso roquefort 1kg" required>
     </div>
     <div class="form-group container">
-        <label for="productPrice"><b>Precio del producto</b></label>
-        <input type="number" class="form-control container" name="productPrice" id="productPrice"
-            placeholder="ej:$1234">
+        <label for="price"><b>Precio del producto</b></label>
+        <input type="number" class="form-control container" name="price" placeholder="ej:$1234" required>
     </div>
     <div class="form-group container">
-        <label for="productImg"><b>Foto del producto</b></label>
-        <input type="url" class="form-control container" name="productImg" id="productImg"
-            placeholder="Url de la imagen">
+        <label for="img"><b>Foto del producto</b></label>
+        <input type="url" class="form-control container" name="img" placeholder="Url de la imagen" required>
     </div>
     <div class="form-group container">
         <label for="stock"><b>Stock</b></label>
-        <input type="text" class="form-control container" name="stock" id="stock" placeholder="ej:5">
+        <input type="text" class="form-control container" name="stock" placeholder="ej:5" required>
     </div>
     <div class="text-center">
         <input type="submit" class="btn btn-succes mt-3 mb-5 btn-secondary"></button>
     </div>
 </form>
-<h2 class="text-danger">Productos agregados:</h2>
-<div class="table-responsive">
-    <table class="table table-dark">
-        <thead>
-            <tr>
-                <th class="col">Nombre del producto</th>
-                <th class="col">Descripción</th>
-                <th class="col">Precio</th>
-                <th class="col">imagen</th>
-                <th class="col">Stock</th>
-            </tr>
-        </thead>
-        <tbody id="tbody">
-        </tbody>
-    </table>
-</div>
+{{#if prod}}
+    <h2>Producto agregado:</h2>
+    <div>
+      <div class="card" style="width: 18rem;">
+        <img src="{{prod.img}}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <h5 class="card-title">{{prod.title}}</h5>
+          <p class="card-text">{{prod.description}}</p>
+          <p class="card-text">${{prod.price}}</p>
+        </div>
+      </div>
+    </div>
+{{/if}}
 <div>
-    <script src="/socket.io/socket.io.min.js"></script>
-    {{#if update}}
-    <script src="../../clients/updateProdClient.js"></script>
-    {{else}}
-    <script src="../clients/addProdsClient.js"></script> 
-    {{/if}}
+<script src="../clients/addProdsClient.js"></script> 
