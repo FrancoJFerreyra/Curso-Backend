@@ -1,31 +1,27 @@
-import { createTransport } from "nodemailer";
+import { createTransport } from 'nodemailer';
 
 const transporter = createTransport({
-    service: 'gmail',
-    port: 587,
-    auth: {
-        user: 'franquitodebanfield@gmail.com',
-        pass: 'rfvabsabiyqhiikw'
-    }
+	service: 'gmail',
+	port: 587,
+	auth: {
+		user: 'franquitodebanfield@gmail.com',
+		pass: 'rfvabsabiyqhiikw',
+	},
 });
 
-
 const mailOptions = {
-    from: 'Servidor Node.js',
-    to: 'franquitodebanfield@gmail.com',
-    subject: '',
-    html: ''
-}
+	from: 'Servidor Node.js',
+	to: 'franquitodebanfield@gmail.com',
+	subject: '',
+	html: '',
+};
 
 const sendEmail = async (options) => {
-    try {
-        const info = await transporter.sendMail(options);
-        console.log(info);
-    } catch (error) {
-        console.log(error);
-    }
-}
-export {
-    mailOptions,
-    sendEmail
-}
+	try {
+		const info = await transporter.sendMail(options);
+		console.log(info);
+	} catch (error) {
+		console.log(error);
+	}
+};
+export { mailOptions, sendEmail };

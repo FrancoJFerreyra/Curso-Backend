@@ -1,6 +1,5 @@
 import express from 'express';
 const { Router } = express;
-import { Server as webSocketServer } from 'socket.io';
 import http from 'http';
 
 import cluster from 'cluster';
@@ -17,7 +16,6 @@ import passportFile from './business/passport.js';
 import passport from 'passport';
 
 import flash from 'connect-flash';
-import util from 'util';
 
 import _loggerW from './config/winston.js';
 
@@ -26,19 +24,17 @@ config();
 
 const app = express();
 const server = http.createServer(app);
-const io = new webSocketServer(server);
-
-//SET COOKIES
-const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true };
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+//SET COOKIES
+const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true };
 
 app.use(cookieParser());
 app.use(
 	session({
 		store: mongoStore.create({
-			mongoUrl: 'mongodb+srv://FrancoDev:FrancoDev@cluster0.dl6ll.mongodb.net/Clase26',
+			mongoUrl: `${process.env.DB}`,
 			mongoOptions: advancedOptions,
 		}),
 		secret: 'shhhh',
@@ -60,7 +56,7 @@ app.use((req, res, next) => {
 	res.locals.deleteProd = req.flash('deleteProd');
 	res.locals.cartAlert = req.flash('cartAlert');
 	res.locals.adminAlert = req.flash('adminAlert');
-	res.locals.adminErrAler = req.flash('adminErrAlert')
+	res.locals.adminErrAler = req.flash('adminErrAlert');
 	next();
 });
 
@@ -108,4 +104,3 @@ if (clusterMode && cluster.isPrimary) {
 		_loggerW.error(error);
 	});
 }
-

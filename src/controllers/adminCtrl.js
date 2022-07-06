@@ -9,10 +9,9 @@ const adminAddProds = async (req, res) => {
 	_loggerW.info(JSON.stringify(prod));
 	const addedProd = await productMongoContainer.save(prod);
 	if (addedProd) {
-		req.flash('adminAlert', 'Producto creado con exito.')
-	}
-	else{
-		req.flash('adminErrAlert', 'Ocurrio un error al eliminar el producto.')
+		req.flash('adminAlert', 'Producto creado con exito.');
+	} else {
+		req.flash('adminErrAlert', 'Ocurrio un error al eliminar el producto.');
 	}
 	res.redirect('/admin/addProds');
 };
@@ -31,7 +30,7 @@ const renderUpdate = async (req, res) => {
 	const idProd = req.params.id;
 	const currentProd = await productMongoContainer.getOneDoc(idProd);
 	const updateTitle = `Actualizar producto con id ${idProd}`;
-	res.render('updateProds', { idProd,updateTitle, currentProd });
+	res.render('updateProds', { idProd, updateTitle, currentProd });
 };
 
 const adminUpdateProd = (req, res) => {

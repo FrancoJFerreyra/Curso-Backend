@@ -60,13 +60,13 @@ const newUserRegister = async (req, res) => {
             </tr>
         </thead>
     <tr>
-		<td><img src="${user.avatar}"></td>
+		<td><img src="${user.avatar}" width="40" height="40"></td>
       <td>${user.email}</td>
       <td>${user.direction}</td>
       <td>${user.username}</td>
       <td>${user.lastname}</td>
       <td>${user.age}</td>
-      <td>${user.full_phone}</td>
+      <td>${user.phone}</td>
 	  <td>${user.role}</td>
     </tr>
     </table>

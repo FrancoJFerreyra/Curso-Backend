@@ -23,8 +23,8 @@ contentRouter.post('/cart/:id', checkAuthentication, addProductsToCart);
 
 contentRouter.post('/cart/deleteProd/:id', checkAuthentication, removeProduct);
 
-contentRouter.post('/cart/purchased', checkAuthentication, purchasedCart);
+contentRouter.get('/cart/purchased', checkAuthentication, purchasedCart);
 
-contentRouter.post('/cart/empty', checkAuthentication, emptyCart);
+contentRouter.get('/cart/empty', checkAuthentication, emptyCart);
 
 export default contentRouter;
